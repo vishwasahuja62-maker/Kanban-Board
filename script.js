@@ -1,3 +1,5 @@
+let tasksData = {};
+
 const todo = document.querySelector('#todo');
 const progress = document.querySelector('#progress');
 const done = document.querySelector('#done');
@@ -83,7 +85,16 @@ addTaskButton.addEventListener("click", () => {
         const tasks = col.querySelectorAll('.task');
         const count = col.querySelector('.right');
 
+        tasksData[col.id] = Array.from(tasks).map(t => {
+            return {
+                title: t.querySelector('h2').innerText,
+                desc: t.querySelector('p').innerText
+            }
+        })
+
+        localStorage.setItem("tasks", JSON.stringify(tasksData));
         count.innerText = tasks.length;
+
     })
 
     div.addEventListener("drag", (e) => {
