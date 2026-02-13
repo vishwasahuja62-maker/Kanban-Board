@@ -4,52 +4,261 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kanban Board</title>
+    <title>ProKanban Elite | Workspace</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Lucide for Premium UI Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
-<body>
-    <main>
-        <nav>
-            <div class="left">Kanban</div>
-            <div class="right" id="toggle-modal"><button>Add New Task</button></div>
-        </nav>
-        <section class="board">
-            <div id="todo" class="task-column">
-                <div class="heading">
-                    <div class="left">To Do</div>
-                    <div class="right">Count</div>
-                </div>
-                <div draggable="true" class="task">
-                    <h2>Task 1</h2>
-                    <p>Description For Task 1</p>
-                    <button>Delete</button>
-                </div>
-            </div>
-            <div id="progress" class="task-column">
-                <div class="heading">
-                    <div class="left">In Progress</div>
-                    <div class="right">Count</div>
-                </div>
-            </div>
-            <div id="done" class="task-column">
-                <div class="heading">
-                    <div class="left">Done</div>
-                    <div class="right">Count</div>
-                </div>
-            </div>
-        </section>
-    </main>
+<body class="blur-app">
+    <!-- Premium Backdrop -->
+    <div class="mesh-bg">
+        <div class="blob b-1"></div>
+        <div class="blob b-2"></div>
+    </div>
 
-    <div class="modal add-new-task">
-        <div class="bg"></div>
-        <div class="center">
-            <input type="text" id="task-title-input" placeholder="Task Title" />
-            <textarea id="task-desc-input" placeholder="Task Description"></textarea>
-            <button id="add-new-task" class="add-task-btn">Add Task</button>
+    <!-- High-Impact Authentication Gateway -->
+    <div id="auth-gateway" class="auth-overlay">
+        <div class="auth-card">
+            <div class="app-logo" style="margin: 0 auto 1.5rem;"><span>P</span></div>
+            <h2>Elite Workspace</h2>
+            <p>Enter your unique alias to restore your private board instance.</p>
+
+            <form id="auth-form" onsubmit="app.handleAuth(event)">
+                <div class="auth-input-group">
+                    <input type="text" id="auth-username" placeholder="Full name or alias" required autocomplete="off">
+                </div>
+                <div class="auth-input-group">
+                    <input type="password" id="auth-password" placeholder="Passphrase (any)" required>
+                </div>
+                <button type="submit" class="btn-auth">Verify & Enter</button>
+            </form>
+            <div id="auth-error" class="auth-error"></div>
         </div>
     </div>
+
+    <div class="app-shell">
+        <!-- Modern Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="app-logo"><span>P</span></div>
+                <h2 class="app-name">ProKanban</h2>
+            </div>
+
+            <nav class="side-nav">
+                <div class="nav-group">
+                    <p class="nav-label">Workspace</p>
+                    <a href="#" id="nav-board" class="nav-item active" onclick="app.switchView('board', event)">
+                        <i data-lucide="layout"></i> <span>Main Board</span>
+                    </a>
+                    <a href="#" id="nav-list" class="nav-item" onclick="app.switchView('list', event)">
+                        <i data-lucide="align-left"></i> <span>Detailed View</span>
+                    </a>
+                    <a href="#" id="nav-analytics" class="nav-item" onclick="app.switchView('analytics', event)">
+                        <i data-lucide="bar-chart-3"></i> <span>Analytics</span>
+                    </a>
+                </div>
+
+                <div class="nav-group">
+                    <p class="nav-label">Team Capacity</p>
+                    <div id="workload-stats" class="workload-container">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="nav-group">
+                    <p class="nav-label">Management</p>
+                    <a href="#" class="nav-item" onclick="app.setFilter('high', event)">
+                        <i data-lucide="zap" style="color: #ef4444"></i> <span>Urgent Focus</span>
+                    </a>
+                    <a href="#" class="nav-item" onclick="app.showArchive(event)">
+                        <i data-lucide="archive"></i> <span>Archive Box</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="activity-log">
+                <p class="nav-label">Live Logs</p>
+                <div id="log-container"></div>
+            </div>
+        </aside>
+
+        <!-- Clean Main Workspace -->
+        <main class="content">
+            <header class="top-bar">
+                <div class="header-left">
+                    <h1>Sprints</h1>
+                    <div class="view-info">
+                        <span>Active Context</span>
+                        <span id="current-view-title">Board Interface</span>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <!-- Consolidated User Identity -->
+                    <div id="user-profile" class="user-widget">
+                        <span id="current-user-name" class="u-name">Assignee</span>
+                        <img id="current-user-avatar" src="" class="u-avatar">
+                    </div>
+
+                    <div class="search-minimal">
+                        <i data-lucide="search" style="width:16px; color:var(--text-muted)"></i>
+                        <input type="text" id="global-search" placeholder="Quick search...">
+                    </div>
+
+                    <div class="nav-actions">
+                        <button class="btn-create-nav" onclick="app.openModal()">
+                            <i data-lucide="plus" style="width:18px"></i> Create
+                        </button>
+                        <button class="btn-icon-nav" onclick="app.toggleTheme()" title="Switch Theme">
+                            <i data-lucide="moon" id="theme-icon"></i>
+                        </button>
+                        <button class="btn-icon-nav" onclick="app.logout()" title="Secure Logout">
+                            <i data-lucide="log-out"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Board View -->
+            <div class="board-grid" id="board-view">
+                <div class="col" ondragover="app.onDragOver(event)" ondrop="app.onDrop(event, 'todo')">
+                    <div class="col-header">
+                        <h3><span class="dot d-todo"></span> Backlog <span class="badge" id="badge-todo">0</span></h3>
+                    </div>
+                    <div class="drop-zone" id="list-todo"></div>
+                </div>
+
+                <div class="col" ondragover="app.onDragOver(event)" ondrop="app.onDrop(event, 'inprogress')">
+                    <div class="col-header">
+                        <h3><span class="dot d-progress"></span> Processing <span class="badge"
+                                id="badge-inprogress">0</span></h3>
+                    </div>
+                    <div class="drop-zone" id="list-inprogress"></div>
+                </div>
+
+                <div class="col" ondragover="app.onDragOver(event)" ondrop="app.onDrop(event, 'done')">
+                    <div class="col-header">
+                        <h3><span class="dot d-done"></span> Shipped <span class="badge" id="badge-done">0</span></h3>
+                        <button class="btn-clear" onclick="app.clearDone()">Clear</button>
+                    </div>
+                    <div class="drop-zone" id="list-done"></div>
+                </div>
+            </div>
+
+            <!-- List View -->
+            <div class="list-view-container" id="list-view" style="display: none;">
+                <!-- Existing List Table Content -->
+                <table class="list-table">
+                    <thead>
+                        <tr>
+                            <th>Intelligence</th>
+                            <th>Lead</th>
+                            <th>Status</th>
+                            <th>Type</th>
+                            <th>Target</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="list-body"></tbody>
+                </table>
+            </div>
+
+            <!-- Analytics View (New Real-World Problem Solution) -->
+            <div class="analytics-view" id="analytics-view" style="display: none; padding: 2.5rem;">
+                <div class="analytics-grid">
+                    <div class="stat-card">
+                        <p>Total Velocity</p>
+                        <h2 id="stat-total">0</h2>
+                        <div class="mini-graph" id="stat-progress-bar"></div>
+                    </div>
+                    <div class="stat-card">
+                        <p>Completed Units</p>
+                        <h2 id="stat-done">0</h2>
+                    </div>
+                    <div class="stat-card" style="border-color: #ef4444">
+                        <p>High Priority Risks</p>
+                        <h2 id="stat-high" style="color:#ef4444">0</h2>
+                    </div>
+                </div>
+                <div id="chart-container" class="chart-box">
+                    <h3>Subtask Completion Rate</h3>
+                    <div id="subtask-master-progress" class="master-progress-ring"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Elite Task Modal -->
+    <div class="modal" id="task-modal">
+        <div class="modal-bg" onclick="app.closeModal()"></div>
+        <div class="modal-box">
+            <header class="modal-header">
+                <h2 id="modal-title">Task Parameters</h2>
+                <button class="close-x" onclick="app.closeModal()">&times;</button>
+            </header>
+
+            <form id="task-form" onsubmit="app.handleFormSubmit(event)">
+                <input type="hidden" id="edit-id">
+                <div class="form-group">
+                    <label>Assignee Node</label>
+                    <div class="avatar-selector" id="avatar-root"></div>
+                    <input type="hidden" id="task-assignee" value="u1">
+                </div>
+
+                <div class="form-group">
+                    <label>Intelligence Title</label>
+                    <input type="text" id="task-name" placeholder="Define objective..." required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Sector</label>
+                        <select id="task-category">
+                            <option value="feature">Feature</option>
+                            <option value="bug">Bug</option>
+                            <option value="design">Design</option>
+                            <option value="research">Research</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Urgency</label>
+                        <select id="task-priority">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Operational Data</label>
+                    <textarea id="task-desc" rows="3" placeholder="Additional context..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Execution Deadline</label>
+                    <input type="date" id="task-due">
+                </div>
+
+                <div class="subtask-section">
+                    <label>Micro-Objectives</label>
+                    <div id="subtask-list"></div>
+                    <button type="button" class="btn-subtask" onclick="app.addSubtask()">
+                        <i data-lucide="plus" style="width:14px"></i> Add Objective
+                    </button>
+                </div>
+
+                <footer class="form-footer">
+                    <button type="button" class="btn-cancel" onclick="app.closeModal()">Discard</button>
+                    <button type="submit" class="btn-save">Commit Task</button>
+                </footer>
+            </form>
+        </div>
+    </div>
+
     <script src="script.js"></script>
+    <script>lucide.createIcons();</script>
 </body>
 
 </html>
