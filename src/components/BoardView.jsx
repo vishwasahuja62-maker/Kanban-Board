@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTasks } from '../context/ProjectContext';
 import TaskCard from './TaskCard';
 import { Plus, Target, Zap, Calendar, FileText, Activity } from 'lucide-react';
-import { DndContext, useDroppable, useSensor, useSensors, PointerSensor, TouchSensor } from '@dnd-kit/core';
+import { DndContext, useDroppable, useSensor, useSensors, MouseSensor, TouchSensor } from '@dnd-kit/core';
 import Modal from './Modal';
 
 function Column({ title, status, tasks, onTaskClick }) {
@@ -117,7 +117,7 @@ function BoardView() {
     // Setup sensors for Drag and Drop
     // We use a delay on TouchSensor to allow scrolling, user must press and hold for 250ms to drag
     const sensors = useSensors(
-        useSensor(PointerSensor, {
+        useSensor(MouseSensor, {
             activationConstraint: {
                 distance: 8, // Require slight movement for mouse to start drag (avoids accidental clicks)
             },
