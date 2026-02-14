@@ -1,11 +1,22 @@
 import { useState, useRef, useEffect } from 'react';
 import { MoreHorizontal, Calendar, CheckSquare, Trash2, Archive, X } from 'lucide-react';
-import { useTasks } from '../context/TaskContext';
+import { useTasks } from '../context/ProjectContext';
+import { useDraggable } from '@dnd-kit/core';
 
-function TaskCard({ task }) {
+function TaskCard({ task, onClick }) {
     const { settings, purgeTask, archiveTask } = useTasks();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
+
+    const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+        id: task.id,
+        data: { task }
+    });
+
+    const style = transform ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        zIndex: isDragging ? 50 : undefined,
+    } : undefined;
 
     const total = task.subtasks?.length || 0;
     const done = task.subtasks?.filter(s => s.done).length || 0;
@@ -22,17 +33,6 @@ function TaskCard({ task }) {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleDragStart = (e) => {
-        if (isMenuOpen) return;
-        e.dataTransfer.setData('taskId', task.id);
-        e.dataTransfer.effectAllowed = 'move';
-        e.currentTarget.classList.add('opacity-30', 'scale-95');
-    };
-
-    const handleDragEnd = (e) => {
-        e.currentTarget.classList.remove('opacity-30', 'scale-95');
-    };
-
     const priorityStyles = {
         high: 'text-red-500 bg-red-500/10 border-red-500/20',
         medium: 'text-amber-500 bg-amber-500/10 border-amber-500/20',
@@ -48,10 +48,12 @@ function TaskCard({ task }) {
 
     return (
         <div
-            draggable
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            className={`group relative bg-white dark:bg-[#0d1117] p-5 rounded-[24px] border border-gray-100 dark:border-white/5 premium-shadow hover:hover:-translate-y-1.5 transition-all duration-500 cursor-grab active:cursor-grabbing overflow-hidden neon-border`}
+            ref={setNodeRef}
+            style={style}
+            {...listeners}
+            {...attributes}
+            onClick={onClick}
+            className={`group relative bg-white dark:bg-[#0d1117] p-5 rounded-[24px] border border-gray-100 dark:border-white/5 premium-shadow hover:hover:-translate-y-1.5 transition-all duration-500 cursor-grab active:cursor-grabbing overflow-hidden neon-border touch-manipulation ${isDragging ? 'opacity-50' : ''}`}
         >
             {/* Decorative Gradient Background */}
             <div className={`absolute inset-0 bg-gradient-to-br ${categoryGradient[task.category] || 'from-gray-500/5 to-gray-400/5'} opacity-50 group-hover:opacity-100 transition-opacity duration-500`} />
@@ -100,7 +102,7 @@ function TaskCard({ task }) {
                                     className="w-full flex items-center gap-3 px-4 py-2 text-[11px] font-black uppercase tracking-widest text-rose-400 hover:text-rose-500 hover:bg-rose-500/5 rounded-xl transition-all"
                                 >
                                     <Trash2 size={14} />
-                                    Purge Unit
+                                    Delete Task
                                 </button>
                             </div>
                         )}

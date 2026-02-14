@@ -31,12 +31,18 @@ export function AuthProvider({ children }) {
         return { data, error };
     };
 
-    const signup = async (email, password) => {
+    const signup = async (email, password, metadata = {}) => {
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
+            options: {
+                data: metadata
+            }
         });
         return { data, error };
+    };
+    const logout = async () => {
+        await supabase.auth.signOut();
     };
 
     const updateProfile = async (metadata) => {
@@ -51,6 +57,12 @@ export function AuthProvider({ children }) {
 
     const metadata = user?.user_metadata || {};
 
+    // Derive a friendly display name from metadata or email
+    const displayName = metadata.display_name || user?.email?.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'New User';
+
+    // Generate avatar URL with fallback
+    const avatarUrl = `https://api.dicebear.com/7.x/notionists/svg?seed=${metadata.avatar_seed || user?.id || 'default'}`;
+
     return (
         <AuthContext.Provider value={{
             user,
@@ -59,8 +71,8 @@ export function AuthProvider({ children }) {
             logout,
             updateProfile,
             loading,
-            displayName: metadata.display_name || user?.email?.split('@')[0] || 'Elite User',
-            avatarUrl: `https://api.dicebear.com/7.x/notionists/svg?seed=${metadata.avatar_seed || user?.id || 'default'}`
+            displayName,
+            avatarUrl
         }}>
             {children}
         </AuthContext.Provider>

@@ -291,4 +291,10 @@ export function TaskProvider({ children }) {
     );
 }
 
-export const useTasks = () => useContext(TaskContext);
+export const useTasks = () => {
+    const context = useContext(TaskContext);
+    if (context === undefined) {
+        throw new Error('useTasks must be used within a TaskProvider');
+    }
+    return context;
+};

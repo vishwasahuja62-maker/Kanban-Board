@@ -1,4 +1,4 @@
-import { useTasks } from '../context/TaskContext';
+import { useTasks } from '../context/ProjectContext';
 import { Target, Zap, CheckCircle2, TrendingUp, Cpu, Activity, BarChart3 } from 'lucide-react';
 
 function AnalyticsView() {
@@ -30,20 +30,19 @@ function AnalyticsView() {
                 </div>
                 <div className="flex gap-4">
                     <div className="flex flex-col items-end">
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Health Index</span>
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Completion Rate</span>
                         <span className="text-xl font-black text-primary" style={{ color: settings.accentColor }}>{completionRate}%</span>
                     </div>
-                    <Activity className="text-primary animate-pulse" style={{ color: settings.accentColor }} />
                 </div>
             </div>
 
             {/* Main Metric Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {[
-                    { label: 'Strategic Tasks', value: total, icon: Target, color: settings.accentColor },
+                    { label: 'Total Tasks', value: total, icon: Target, color: settings.accentColor },
                     { label: 'Tasks in Progress', value: inProgress, icon: Cpu, color: '#3b82f6' },
-                    { label: 'Completed Milestones', value: done, icon: CheckCircle2, color: '#10b981' },
-                    { label: 'High Priority Issues', value: high, icon: Zap, color: '#f43f5e' }
+                    { label: 'Completed Tasks', value: done, icon: CheckCircle2, color: '#10b981' },
+                    { label: 'High Priority', value: high, icon: Zap, color: '#f43f5e' }
                 ].map((stat, i) => (
                     <div key={i} className="glass-card p-8 rounded-[40px] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-current opacity-[0.03] rotate-45 translate-x-16 -translate-y-16 group-hover:opacity-[0.07] transition-opacity" style={{ color: stat.color }} />
@@ -59,7 +58,7 @@ function AnalyticsView() {
                 <div className="lg:col-span-2 glass-card p-10 rounded-[48px] border border-white/20 dark:border-white/5 shadow-2xl">
                     <div className="flex items-center gap-3 mb-10">
                         <TrendingUp size={20} className="text-primary" style={{ color: settings.accentColor }} />
-                        <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Workflow Trajectory</h3>
+                        <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Task Progress</h3>
                     </div>
 
                     <div className="space-y-12">
@@ -71,7 +70,7 @@ function AnalyticsView() {
                                     </span>
                                 </div>
                                 <div className="text-right">
-                                    <span className="text-sm font-black text-gray-900 dark:text-white">{completionRate}% Accomplished</span>
+                                    <span className="text-sm font-black text-gray-900 dark:text-white">{completionRate}% Completed</span>
                                 </div>
                             </div>
                             <div className="overflow-hidden h-4 mb-4 text-xs flex rounded-full bg-gray-100 dark:bg-white/5 p-1 border border-gray-100 dark:border-white/10">
@@ -100,11 +99,11 @@ function AnalyticsView() {
                     </div>
                 </div>
 
-                {/* Departmental Breakthrough */}
+                {/* Category Breakdown */}
                 <div className="glass-card p-10 rounded-[48px] border border-white/20 dark:border-white/5 relative overflow-hidden">
                     <div className="flex items-center gap-3 mb-10">
                         <BarChart3 size={20} className="text-primary" style={{ color: settings.accentColor }} />
-                        <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Focus Distribution</h3>
+                        <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Category Distribution</h3>
                     </div>
 
                     <div className="space-y-6">
@@ -131,7 +130,7 @@ function AnalyticsView() {
                     <div className="mt-12 pt-8 border-t border-gray-100 dark:border-white/5">
                         <div className="p-6 bg-primary/5 rounded-3xl border border-primary/10" style={{ backgroundColor: `${settings.accentColor}05`, borderColor: `${settings.accentColor}10` }}>
                             <p className="text-[11px] font-bold text-gray-500 leading-relaxed italic">
-                                "Peak performance detected in {categoryCount.sort((a, b) => b.count - a.count)[0]?.name || 'system'} sector."
+                                "Highest activity in {categoryCount.sort((a, b) => b.count - a.count)[0]?.name || 'general'} category."
                             </p>
                         </div>
                     </div>

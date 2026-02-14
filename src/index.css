@@ -138,3 +138,21 @@
 .animate-progress {
     animation: progress-sync 2.5s ease-in-out infinite;
 }
+
+@keyframes pulse-slow {
+
+    0%,
+    100% {
+        opacity: 0.4;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+}
+
+.animate-pulse-slow {
+    animation: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

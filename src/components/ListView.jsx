@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useTasks } from '../context/TaskContext';
+import { useTasks } from '../context/ProjectContext';
 import { Edit3, Trash2, ChevronRight, LayoutGrid, Info, Calendar, Shield, Rocket, Activity, X, Target, FileText } from 'lucide-react';
 import Modal from './Modal';
 
@@ -58,7 +58,7 @@ function ListView() {
                         <div className="p-8 rounded-full border-2 border-gray-200 dark:border-white/10">
                             <Rocket size={48} className="text-gray-300" />
                         </div>
-                        <span className="text-xs font-black uppercase tracking-[0.5em] text-gray-400"> No units detected in local sector </span>
+                        <span className="text-xs font-black uppercase tracking-[0.5em] text-gray-400"> No tasks found </span>
                     </div>
                 ) : (
                     listTasks.map(task => (
@@ -83,7 +83,7 @@ function ListView() {
                                             {task.priority === 'high' && <Shield size={14} className="text-red-500" />}
                                         </h4>
                                         <div className="flex items-center gap-3 mt-1 opacity-50">
-                                            <span className="text-[10px] font-bold uppercase tracking-wider">Ref: {task.id.slice(0, 8)}</span>
+                                            <span className="text-[10px] font-bold uppercase tracking-wider">ID: {task.id.slice(0, 8)}</span>
                                             <div className="w-1 h-1 rounded-full bg-current" />
                                             <span className={`text-[9px] font-black uppercase tracking-widest`}>
                                                 {task.category}
@@ -105,7 +105,7 @@ function ListView() {
                                         </span>
                                     </div>
                                     <div className="flex flex-col gap-1.5 lg:hidden xl:flex">
-                                        <span className="text-[9px] font-black uppercase text-gray-400 tracking-widest">Update Cycle</span>
+                                        <span className="text-[9px] font-black uppercase text-gray-400 tracking-widest">Last Updated</span>
                                         <div className="flex items-center gap-2 text-[11px] font-bold text-gray-500">
                                             <Calendar size={12} />
                                             <span>{new Date(task.updated_at || task.created_at).toLocaleDateString()}</span>
@@ -131,7 +131,7 @@ function ListView() {
                                                 archiveTask(task.id);
                                             }}
                                             className="p-3.5 text-gray-300 hover:text-rose-500 hover:bg-rose-500/10 rounded-2xl transition-all"
-                                            title="Archive Unit"
+                                            title="Archive Task"
                                         >
                                             <Trash2 size={20} />
                                         </button>
@@ -195,7 +195,7 @@ function ListView() {
 
                         <div className="space-y-4">
                             <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-2 px-1">
-                                <FileText size={14} /> Strategic Brief
+                                <FileText size={14} /> Description
                             </span>
                             <div className="p-8 bg-gray-50 dark:bg-white/5 rounded-[40px] border border-gray-100 dark:border-white/10 min-h-[160px]">
                                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm font-medium italic">

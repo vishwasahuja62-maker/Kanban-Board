@@ -1,4 +1,4 @@
-import { useTasks } from '../context/TaskContext';
+import { useTasks } from '../context/ProjectContext';
 import { RefreshCw, Trash2, ShieldAlert, Database, History, Search } from 'lucide-react';
 
 function ArchiveView() {
@@ -20,7 +20,7 @@ function ArchiveView() {
                         <Database size={20} className="text-gray-400" />
                         <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight"> Task Archive </h2>
                     </div>
-                    <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em] pl-1"> Historical task and completion records </p>
+                    <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em] pl-1"> View your archived items </p>
                 </div>
 
                 <div className="flex items-center gap-6">
@@ -33,7 +33,7 @@ function ArchiveView() {
                         />
                     </div>
                     <button className="h-12 px-6 bg-red-500/10 text-red-500 border border-red-500/20 rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all duration-300 shadow-lg shadow-red-500/10">
-                        Purge All
+                        Delete All
                     </button>
                 </div>
             </div>
@@ -80,7 +80,7 @@ function ArchiveView() {
                                                 <img
                                                     src={`https://api.dicebear.com/7.x/notionists/svg?seed=${task.assignee || task.ownerId}`}
                                                     className="w-10 h-10 rounded-xl relative z-10 border-2 border-white dark:border-gray-800 shadow-sm"
-                                                    alt="Lead"
+                                                    alt="Assignee"
                                                 />
                                             </div>
                                         </div>
@@ -102,14 +102,14 @@ function ArchiveView() {
                                                 onClick={() => restoreTask(task.id)}
                                                 className="p-3 text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-primary rounded-xl transition-all"
                                                 style={{ '--tw-hover-color': settings.accentColor }}
-                                                title="Restore Unit"
+                                                title="Restore Task"
                                             >
                                                 <RefreshCw size={18} />
                                             </button>
                                             <button
                                                 onClick={() => purgeTask(task.id)}
                                                 className="p-3 text-gray-400 hover:bg-rose-500/10 hover:text-rose-500 rounded-xl transition-all"
-                                                title="Permanent Purge"
+                                                title="Delete Permanently"
                                             >
                                                 <Trash2 size={18} />
                                             </button>
@@ -138,7 +138,7 @@ function ArchiveView() {
                         <span className="text-[9px] font-black uppercase text-gray-400 tracking-widest">Critical Bugs</span>
                     </div>
                 </div>
-                <span className="text-[10px] font-black text-gray-400/50 uppercase tracking-[0.2em]">Workspace: Pro Manager Mode</span>
+                <span className="text-[10px] font-black text-gray-400/50 uppercase tracking-[0.2em]">Workspace: Active</span>
             </div>
         </div>
     );

@@ -1,26 +1,15 @@
 import { useState } from 'react';
-import { useTasks } from '../context/TaskContext';
+import { useTasks } from '../context/ProjectContext';
 import TaskCard from './TaskCard';
-import { Plus, Target, Zap } from 'lucide-react';
+import { Plus, Target, Zap, Calendar, FileText, Activity } from 'lucide-react';
+import { DndContext, useDroppable, useSensor, useSensors, PointerSensor, TouchSensor } from '@dnd-kit/core';
+import Modal from './Modal';
 
-function Column({ title, status, tasks }) {
-    const [isOver, setIsOver] = useState(false);
-    const { updateTaskStatus, clearDone, settings } = useTasks();
-
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        setIsOver(true);
-    };
-
-    const handleDragLeave = () => setIsOver(false);
-
-    const handleDrop = (e) => {
-        e.preventDefault();
-        setIsOver(false);
-        const taskId = e.dataTransfer.getData('taskId');
-        if (taskId) updateTaskStatus(taskId, status);
-    };
+function Column({ title, status, tasks, onTaskClick }) {
+    const { isOver, setNodeRef } = useDroppable({
+        id: status,
+    });
+    const { clearDone, settings } = useTasks();
 
     const statusColors = {
         todo: settings.accentColor,
@@ -30,15 +19,14 @@ function Column({ title, status, tasks }) {
 
     return (
         <div
-            className={`flex flex-col h-full min-w-0 transition-all duration-700 rounded-[50px] relative group/column ${isOver ? 'scale-[1.03] z-30' : 'z-10'}`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
+            ref={setNodeRef}
+            className={`flex flex-col min-h-[400px] md:h-full min-w-0 transition-all duration-700 rounded-[32px] md:rounded-[50px] relative group/column ${isOver ? 'scale-[1.01] md:scale-[1.03] z-30 ring-2 ring-primary/20 bg-primary/5' : 'z-10 bg-transparent'}`}
+            style={isOver ? { borderColor: settings.accentColor } : {}}
         >
-            {/* ELITE HOLOGRAPHIC OVERLAY */}
+            {/* Dynamic Overlay */}
             {settings.holographic && (
                 <div
-                    className={`absolute inset-x-[-12px] inset-y-[-12px] rounded-[60px] transition-all duration-700 pointer-events-none overflow-hidden
+                    className={`absolute inset-x-[-12px] inset-y-[-12px] rounded-[40px] md:rounded-[60px] transition-all duration-700 pointer-events-none overflow-hidden
                         ${isOver ? 'opacity-100' : 'opacity-0 scale-95'}`}
                     style={{
                         border: `1px solid ${settings.accentColor}40`,
@@ -46,33 +34,22 @@ function Column({ title, status, tasks }) {
                         boxShadow: `0 0 50px ${settings.accentColor}15, inset 0 0 30px ${settings.accentColor}05`
                     }}
                 >
-                    {/* Tech Grid Background */}
+                    {/* Grid Pattern */}
                     <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.07]"
                         style={{ backgroundImage: `radial-gradient(${settings.accentColor} 1px, transparent 1px)`, backgroundSize: '20px 20px' }} />
 
-                    {/* Scanning Laser Line */}
+                    {/* Highlight Line */}
                     <div className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-current to-transparent animate-scan-fast"
                         style={{ color: settings.accentColor, top: '-10%' }} />
-
-                    {/* Corner Brackets */}
-                    <div className="absolute top-8 left-8 w-6 h-6 border-t-2 border-l-2 opacity-50" style={{ borderColor: settings.accentColor }} />
-                    <div className="absolute top-8 right-8 w-6 h-6 border-t-2 border-r-2 opacity-50" style={{ borderColor: settings.accentColor }} />
-                    <div className="absolute bottom-8 left-8 w-6 h-6 border-b-2 border-l-2 opacity-50" style={{ borderColor: settings.accentColor }} />
-                    <div className="absolute bottom-8 right-8 w-6 h-6 border-b-2 border-r-2 opacity-50" style={{ borderColor: settings.accentColor }} />
-
-                    {/* Floating Particles/Icons */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 animate-ping">
-                        <Target size={120} style={{ color: settings.accentColor }} strokeWidth={0.5} />
-                    </div>
                 </div>
             )}
 
             <div className={`relative z-20 flex flex-col h-full transition-all duration-700 ${isOver ? 'translate-y-[-4px]' : ''}`}>
-                <div className="flex justify-between items-end mb-10 px-4">
+                <div className="flex justify-between items-end mb-6 md:mb-10 px-4">
                     <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-3">
-                            <div className="w-2.5 h-2.5 rounded-full shadow-lg animate-pulse" style={{ backgroundColor: statusColors[status], boxShadow: `0 0 15px ${statusColors[status]}80` }} />
-                            <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-gray-400 dark:text-gray-500 leading-none">
+                            <div className="w-2.5 h-2.5 rounded-full shadow-lg" style={{ backgroundColor: statusColors[status], boxShadow: `0 0 15px ${statusColors[status]}80` }} />
+                            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 leading-none">
                                 {title}
                             </h3>
                         </div>
@@ -81,8 +58,8 @@ function Column({ title, status, tasks }) {
                                 {tasks.length < 10 ? `0${tasks.length}` : tasks.length}
                             </span>
                             <div className="flex flex-col">
-                                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">Units</span>
-                                <span className="text-[9px] font-black text-gray-500/50 uppercase tracking-widest">Active</span>
+                                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">TASKS</span>
+                                <span className="text-[9px] font-black text-gray-500/50 uppercase tracking-widest">TOTAL</span>
                             </div>
                         </div>
                     </div>
@@ -90,25 +67,29 @@ function Column({ title, status, tasks }) {
                     {status === 'done' && tasks.length > 0 && (
                         <button
                             onClick={clearDone}
-                            className="group/btn flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-rose-500/60 hover:text-rose-500 px-5 py-2.5 rounded-2xl bg-rose-500/5 hover:bg-rose-500/10 transition-all duration-300 border border-transparent hover:border-rose-500/20"
+                            className="group/btn flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-rose-500/60 hover:text-rose-500 px-4 py-2 rounded-xl bg-rose-500/5 hover:bg-rose-500/10 transition-all duration-300"
                         >
                             <Zap size={14} className="group-hover:scale-110 transition-transform" />
-                            Purge Records
+                            Clear All
                         </button>
                     )}
                 </div>
 
-                <div className={`flex-1 overflow-y-auto pr-3 space-y-6 scrollbar-hide pb-24 transition-all duration-700 ${isOver ? 'px-4 blur-[1px] opacity-40 grayscale' : ''}`}>
+                <div className={`flex-1 md:overflow-y-auto pr-0 md:pr-3 space-y-4 md:space-y-6 scrollbar-hide pb-4 md:pb-24 transition-all duration-700 ${isOver ? 'px-4' : ''}`}>
                     {tasks.map(task => (
-                        <TaskCard key={task.id} task={task} />
+                        <TaskCard
+                            key={task.id}
+                            task={task}
+                            onClick={() => onTaskClick(task)}
+                        />
                     ))}
 
                     {tasks.length === 0 && (
-                        <div className="h-56 border-2 border-dashed border-gray-100 dark:border-white/5 rounded-[48px] flex flex-col items-center justify-center text-gray-400/50 dark:text-gray-600 font-bold text-xs gap-6 hover:border-primary/30 hover:text-primary transition-all duration-500 bg-white/40 dark:bg-card-dark/20 backdrop-blur-[2px]">
-                            <div className="w-16 h-16 rounded-full border-2 border-current flex items-center justify-center animate-bounce-slow">
+                        <div className="h-40 md:h-56 border-2 border-dashed border-gray-100 dark:border-white/5 rounded-[32px] md:rounded-[48px] flex flex-col items-center justify-center text-gray-400/50 dark:text-gray-600 font-bold text-xs gap-4 md:gap-6 hover:border-primary/30 hover:text-primary transition-all duration-500 bg-white/40 dark:bg-card-dark/20 backdrop-blur-[2px]">
+                            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-current flex items-center justify-center">
                                 <Plus size={24} strokeWidth={3} />
                             </div>
-                            <span className="uppercase tracking-[0.4em] text-[10px] font-black">Awaiting Deployment</span>
+                            <span className="uppercase tracking-[0.2em] text-[10px] font-black">No Tasks Yet</span>
                         </div>
                     )}
                 </div>
@@ -118,7 +99,46 @@ function Column({ title, status, tasks }) {
 }
 
 function BoardView() {
-    const { tasks, activeFilter, settings, loading } = useTasks();
+    const { tasks, activeFilter, settings, loading, updateTaskStatus } = useTasks();
+    const [selectedTask, setSelectedTask] = useState(null);
+
+    // Setup sensors for Drag and Drop
+    // We use a delay on TouchSensor to allow scrolling, user must press and hold for 250ms to drag
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8, // Require slight movement for mouse to start drag (avoids accidental clicks)
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 250, // Press and hold for 250ms to pick up
+                tolerance: 5, // Allow 5px movement during hold without cancelling
+            },
+        })
+    );
+
+    const handleDragEnd = (event) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            const newStatus = over.id;
+            updateTaskStatus(active.id, newStatus);
+        }
+    };
+
+    const categoryColors = {
+        feature: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20',
+        bug: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
+        design: 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20',
+        research: 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+    };
+
+    const priorityColors = {
+        low: 'bg-blue-500/10 text-blue-500',
+        medium: 'bg-amber-500/10 text-amber-500',
+        high: 'bg-rose-500/10 text-rose-500 animate-pulse'
+    };
 
     if (loading) return (
         <div className="h-full w-full flex items-center justify-center">
@@ -130,7 +150,7 @@ function BoardView() {
                     </div>
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                    <span className="text-[12px] font-black uppercase tracking-[0.5em] animate-pulse text-gray-400">Synchronizing Intel</span>
+                    <span className="text-[12px] font-black uppercase tracking-[0.3em] animate-pulse text-gray-400">Loading Tasks...</span>
                     <div className="h-1 w-32 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
                         <div className="h-full bg-primary animate-progress" style={{ width: '60%', backgroundColor: settings.accentColor }} />
                     </div>
@@ -145,22 +165,107 @@ function BoardView() {
     }
 
     const columns = [
-        { title: 'Backlog', status: 'todo' },
-        { title: 'In Service', status: 'inprogress' },
-        { title: 'Shipped', status: 'done' },
+        { title: 'To Do', status: 'todo' },
+        { title: 'In Progress', status: 'inprogress' },
+        { title: 'Done', status: 'done' },
     ];
 
     return (
-        <div className={`grid grid-cols-1 md:grid-cols-3 h-full overflow-hidden ${settings.density === 'compact' ? 'gap-6 p-4' : 'gap-16 p-6'}`}>
-            {columns.map(col => (
-                <Column
-                    key={col.status}
-                    title={col.title}
-                    status={col.status}
-                    tasks={boardTasks.filter(t => t.status === col.status)}
-                />
-            ))}
-        </div>
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+            <div className={`h-full ${settings.density === 'compact' ? 'p-2 sm:p-4' : 'p-3 sm:p-6'} overflow-y-auto md:overflow-y-hidden overflow-x-hidden md:overflow-x-auto scrollbar-hide`}>
+                {/* Mobile: Flex Column (Vertical Stack), Desktop: Grid (Horizontal Columns) */}
+                <div className={`
+                    flex flex-col md:grid md:grid-flow-col md:auto-cols-[minmax(280px,1fr)] md:grid-cols-3 
+                    gap-8 md:gap-6 lg:gap-10 h-auto md:h-full
+                    ${settings.density === 'compact' ? 'gap-6' : ''}
+                `}>
+                    {columns.map(col => (
+                        <Column
+                            key={col.status}
+                            title={col.title}
+                            status={col.status}
+                            tasks={boardTasks.filter(t => t.status === col.status)}
+                            onTaskClick={setSelectedTask}
+                        />
+                    ))}
+                </div>
+                {/* Bottom spacer for mobile scrolling */}
+                <div className="h-20 md:hidden" />
+            </div>
+
+            {/* Task Detail Modal */}
+            <Modal
+                isOpen={!!selectedTask}
+                onClose={() => setSelectedTask(null)}
+                title="Task Overview"
+            >
+                {selectedTask && (
+                    <div className="space-y-10 p-2">
+                        <div className="flex items-start justify-between">
+                            <div className="space-y-2">
+                                <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{selectedTask.name}</h3>
+                                <div className="flex items-center gap-3">
+                                    <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full border ${categoryColors[selectedTask.category]}`}>
+                                        {selectedTask.category}
+                                    </span>
+                                    <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full ${priorityColors[selectedTask.priority]}`}>
+                                        {selectedTask.priority} Risk
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-3xl border border-gray-100 dark:border-white/10">
+                                <Activity size={24} className="text-primary" style={{ color: settings.accentColor }} />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6">
+                            <div className="p-6 bg-gray-50 dark:bg-white/[0.02] rounded-[32px] border border-gray-100 dark:border-white/5 space-y-3">
+                                <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
+                                    <Calendar size={14} /> Created On
+                                </span>
+                                <p className="text-sm font-black text-gray-900 dark:text-white">
+                                    {new Date(selectedTask.created_at).toLocaleDateString(undefined, { dateStyle: 'long' })}
+                                </p>
+                            </div>
+                            <div className="p-6 bg-gray-50 dark:bg-white/[0.02] rounded-[32px] border border-gray-100 dark:border-white/5 space-y-3">
+                                <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
+                                    <Target size={14} /> Current Status
+                                </span>
+                                <p className="text-sm font-black text-gray-900 dark:text-white capitalize">
+                                    {selectedTask.status === 'inprogress' ? 'In Progress' : selectedTask.status}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-2 px-1">
+                                <FileText size={14} /> Description
+                            </span>
+                            <div className="p-8 bg-gray-50 dark:bg-white/5 rounded-[40px] border border-gray-100 dark:border-white/10 min-h-[160px]">
+                                <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm font-medium italic">
+                                    {selectedTask.description || "No specific details provided for this task."}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-4 pt-4">
+                            <button
+                                onClick={() => setSelectedTask(null)}
+                                className="flex-1 py-5 rounded-[24px] bg-gray-100 dark:bg-white/5 text-gray-500 font-extrabold uppercase text-[11px] tracking-widest hover:bg-gray-200 dark:hover:bg-white/10 transition-all"
+                            >
+                                Close Details
+                            </button>
+                            <button
+                                className="flex-1 py-5 rounded-[24px] text-white font-extrabold uppercase text-[11px] tracking-widest shadow-xl transition-all hover:scale-[1.02]"
+                                style={{ backgroundColor: settings.accentColor, boxShadow: `0 15px 30px ${settings.accentColor}40` }}
+                            >
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </Modal>
+        </DndContext>
     );
 }
 

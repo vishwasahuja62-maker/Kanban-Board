@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Search, Plus, Moon, Sun, LogOut, ChevronDown, Rocket, Target, Shield, Clock, FileText, LayoutGrid, AlignLeft, BarChart3, Archive } from 'lucide-react';
+import { Search, Plus, Moon, Sun, LogOut, ChevronDown, Rocket, Target, Shield, Clock, FileText, LayoutGrid, AlignLeft, BarChart3, Archive, Menu } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useTasks } from '../context/TaskContext';
+import { useTasks } from '../context/ProjectContext';
 import Modal from './Modal';
 
-function TopBar({ currentView, setView, theme, setTheme }) {
+function TopBar({ currentView, setView, theme, setTheme, isMobile, onMenuToggle }) {
     const { logout, displayName, avatarUrl } = useAuth();
     const { addTask, settings } = useTasks();
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
@@ -26,9 +26,9 @@ function TopBar({ currentView, setView, theme, setTheme }) {
 
     const handleAddTask = (e) => {
         e.preventDefault();
-        console.log("Deploying Unit from TopBar, taskName:", taskName);
+        console.log("Creating Task from TopBar, taskName:", taskName);
         if (!taskName) {
-            alert("Identification Required: Please enter a Unit Objective Name before deployment.");
+            alert("Required: Please enter a Task Name.");
             return;
         }
         addTask({
@@ -54,17 +54,25 @@ function TopBar({ currentView, setView, theme, setTheme }) {
 
     return (
         <>
-            <header className={`sticky top-0 px-10 flex justify-between items-center z-40 transition-all duration-300 backdrop-blur-md border-b border-gray-100 dark:border-white/5 bg-white/70 dark:bg-[#08090d]/70 ${settings.density === 'compact' ? 'py-4' : 'py-8'}`}>
-                <div className="flex items-center gap-12">
+            <header className={`sticky top-0 px-4 sm:px-6 lg:px-10 flex justify-between items-center z-40 transition-all duration-300 backdrop-blur-md border-b border-gray-100 dark:border-white/5 bg-white/70 dark:bg-[#08090d]/70 ${settings.density === 'compact' ? 'py-3 lg:py-4' : 'py-4 lg:py-8'}`}>
+                <div className="flex items-center gap-4 lg:gap-12">
+                    {isMobile && (
+                        <button
+                            onClick={onMenuToggle}
+                            className="p-2.5 rounded-xl bg-gray-50 dark:bg-white/5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        >
+                            <Menu size={20} />
+                        </button>
+                    )}
                     <div className="flex flex-col relative">
                         <span className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-1">
-                            Command Center
+                            Project Dashboard
                         </span>
                         <div
                             className="flex items-center gap-2 group cursor-pointer select-none"
                             onClick={() => setIsViewMenuOpen(!isViewMenuOpen)}
                         >
-                            <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+                            <h1 className="text-xl lg:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
                                 {titleMap[currentView]}
                             </h1>
                             <div className="p-1.5 rounded-xl bg-gray-50 dark:bg-white/5 group-hover:bg-gray-100 dark:group-hover:bg-white/10 transition-colors">
@@ -81,7 +89,7 @@ function TopBar({ currentView, setView, theme, setTheme }) {
                             <>
                                 <div className="absolute top-[calc(100%+24px)] left-0 w-80 bg-white dark:bg-[#0d1117] border border-gray-200 dark:border-white/10 rounded-[32px] shadow-[0_30px_60px_rgba(0,0,0,0.25)] p-3 z-60 animate-in fade-in slide-in-from-top-4 duration-300">
                                     <div className="px-5 py-3 mb-2 border-b border-gray-100 dark:border-white/5">
-                                        <span className="text-[9px] font-black uppercase text-gray-400 tracking-[0.2em]">Select Deployment Sector</span>
+                                        <span className="text-[9px] font-black uppercase text-gray-400 tracking-[0.2em]">Select View</span>
                                     </div>
                                     <div className="space-y-1">
                                         {viewOptions.map(option => (
@@ -116,46 +124,43 @@ function TopBar({ currentView, setView, theme, setTheme }) {
                         <Search size={18} className="text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Find units..."
+                            placeholder="Search tasks..."
                             className="bg-transparent border-none outline-none text-sm font-bold text-gray-700 dark:text-gray-200 w-48 focus:w-80 transition-all duration-500"
                         />
                     </div>
                 </div>
 
-                <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-4 bg-white/50 dark:bg-white/[0.03] pl-2 pr-6 py-2 rounded-2xl border border-gray-100 dark:border-white/5 backdrop-blur-md">
-                        <img src={avatarUrl} className="w-10 h-10 rounded-xl shadow-md border-2 border-white dark:border-gray-800" alt="User" />
-                        <div className="flex flex-col">
-                            <span className="text-[13px] font-black text-gray-900 dark:text-white leading-tight">{displayName}</span>
-                            <span className="text-[9px] font-black uppercase tracking-widest opacity-80" style={{ color: settings.accentColor }}>Commander</span>
-                        </div>
+                <div className="flex items-center gap-3 lg:gap-6">
+                    <div className="hidden md:flex items-center gap-3 bg-white/50 dark:bg-white/[0.03] pl-2 pr-4 py-2 rounded-2xl border border-gray-100 dark:border-white/5 backdrop-blur-md">
+                        <img src={avatarUrl} className="w-8 h-8 rounded-full shadow-sm border border-white dark:border-gray-800" alt="User" />
+                        <span className="text-sm font-bold text-gray-900 dark:text-white">{displayName}</span>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 lg:gap-3">
                         <button
                             onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-                            className="w-12 h-12 flex items-center justify-center bg-white dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 text-gray-400 rounded-2xl hover:text-primary transition-all duration-300"
+                            className="w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center bg-white dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 text-gray-400 rounded-xl lg:rounded-2xl hover:text-primary transition-all duration-300"
                             style={{ '--tw-hover-color': settings.accentColor }}
                         >
-                            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
                         </button>
 
                         <button
                             onClick={() => setIsTaskModalOpen(true)}
-                            className="h-12 px-6 text-white rounded-2xl shadow-lg hover:-translate-y-0.5 transition-all duration-300 font-black text-[13px] flex items-center gap-3"
+                            className="h-10 lg:h-12 px-3 lg:px-6 text-white rounded-xl lg:rounded-2xl shadow-lg hover:-translate-y-0.5 transition-all duration-300 font-black text-[13px] flex items-center gap-2 lg:gap-3"
                             style={{ backgroundColor: settings.accentColor, boxShadow: `0 10px 40px -10px ${settings.accentColor}60` }}
                         >
-                            <Plus size={20} strokeWidth={3} />
-                            <span>Launch Unit</span>
+                            <Plus size={18} strokeWidth={3} />
+                            <span className="hidden sm:inline">New Task</span>
                         </button>
 
-                        <div className="w-px h-8 bg-gray-200 dark:bg-white/10 mx-2" />
+                        <div className="hidden sm:block w-px h-8 bg-gray-200 dark:bg-white/10 mx-1 lg:mx-2" />
 
                         <button
                             onClick={logout}
-                            className="w-12 h-12 flex items-center justify-center bg-white dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 text-gray-400 hover:text-red-500 rounded-2xl transition-all duration-300"
+                            className="w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center bg-white dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 text-gray-400 hover:text-red-500 rounded-xl lg:rounded-2xl transition-all duration-300"
                         >
-                            <LogOut size={20} />
+                            <LogOut size={18} />
                         </button>
                     </div>
                 </div>
@@ -166,13 +171,13 @@ function TopBar({ currentView, setView, theme, setTheme }) {
                     <div className="space-y-4">
                         <div className="flex items-center gap-2 text-[10px] font-black uppercase text-gray-400 tracking-widest">
                             <Target size={14} />
-                            <span>Task Description</span>
+                            <span>Task Name</span>
                         </div>
                         <input
                             type="text"
                             value={taskName}
                             onChange={(e) => setTaskName(e.target.value)}
-                            placeholder="Unique Objective Name"
+                            placeholder="Enter task title"
                             className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 p-5 rounded-[24px] outline-none focus:ring-2 focus:ring-offset-0 text-gray-900 dark:text-white font-bold transition-all"
                             style={{ '--tw-ring-color': settings.accentColor }}
                             required
@@ -182,12 +187,12 @@ function TopBar({ currentView, setView, theme, setTheme }) {
                     <div className="space-y-4">
                         <div className="flex items-center gap-2 text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">
                             <FileText size={14} />
-                            <span>Strategic Brief</span>
+                            <span>Description</span>
                         </div>
                         <textarea
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            placeholder="Detailed operational context..."
+                            placeholder="Add details..."
                             rows={3}
                             className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 p-5 rounded-[24px] outline-none focus:ring-2 focus:ring-offset-0 text-gray-900 dark:text-white font-medium text-sm transition-all resize-none"
                             style={{ '--tw-ring-color': settings.accentColor }}
@@ -217,7 +222,7 @@ function TopBar({ currentView, setView, theme, setTheme }) {
                         <div className="space-y-3">
                             <label className="flex items-center gap-2 text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">
                                 <Rocket size={14} />
-                                Department
+                                Category
                             </label>
                             <div className="relative">
                                 <select
@@ -225,10 +230,10 @@ function TopBar({ currentView, setView, theme, setTheme }) {
                                     onChange={(e) => setCategory(e.target.value)}
                                     className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 p-5 rounded-[20px] outline-none text-[13px] font-bold appearance-none cursor-pointer hover:bg-gray-100 dark:hover:bg-white/10 text-gray-900 dark:text-gray-100 transition-all shadow-sm"
                                 >
-                                    <option value="feature" className="bg-white dark:bg-[#0d1117] text-gray-900 dark:text-white">Feature Development</option>
-                                    <option value="bug" className="bg-white dark:bg-[#0d1117] text-gray-900 dark:text-white">Bug Eradication</option>
-                                    <option value="design" className="bg-white dark:bg-[#0d1117] text-gray-900 dark:text-white">Elite Design</option>
-                                    <option value="research" className="bg-white dark:bg-[#0d1117] text-gray-900 dark:text-white">High R&D</option>
+                                    <option value="feature" className="bg-white dark:bg-[#0d1117] text-gray-900 dark:text-white">Feature</option>
+                                    <option value="bug" className="bg-white dark:bg-[#0d1117] text-gray-900 dark:text-white">Bug Fix</option>
+                                    <option value="design" className="bg-white dark:bg-[#0d1117] text-gray-900 dark:text-white">Design</option>
+                                    <option value="research" className="bg-white dark:bg-[#0d1117] text-gray-900 dark:text-white">Research</option>
                                 </select>
                                 <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
                                     <ChevronDown size={16} />
@@ -240,7 +245,7 @@ function TopBar({ currentView, setView, theme, setTheme }) {
                     <div className="space-y-3">
                         <label className="flex items-center gap-2 text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">
                             <Clock size={14} />
-                            Deadline Target
+                            Due Date
                         </label>
                         <input
                             type="date"
@@ -256,7 +261,7 @@ function TopBar({ currentView, setView, theme, setTheme }) {
                         style={{ backgroundColor: settings.accentColor, boxShadow: `0 20px 50px -10px ${settings.accentColor}60` }}
                     >
                         <Plus size={20} strokeWidth={4} />
-                        <span>Finalize Task</span>
+                        <span>Create Task</span>
                     </button>
                 </form>
             </Modal>
