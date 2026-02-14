@@ -1,13 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import Sidebar from './components/Sidebar'
 import TopBar from './components/TopBar'
-import BoardView from './components/BoardView'
-import ListView from './components/ListView'
-import AnalyticsView from './components/AnalyticsView'
-import ArchiveView from './components/ArchiveView'
-import AuthGateway from './components/AuthGateway'
 import { TaskProvider, useTasks } from './context/ProjectContext'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { Zap } from 'lucide-react'
+
+// Lazy load views for better performance
+const BoardView = lazy(() => import('./components/BoardView'));
+const ListView = lazy(() => import('./components/ListView'));
+const AnalyticsView = lazy(() => import('./components/AnalyticsView'));
+const ArchiveView = lazy(() => import('./components/ArchiveView'));
+const AuthGateway = lazy(() => import('./components/AuthGateway'));
 
 function useMediaQuery(query) {
     const [matches, setMatches] = useState(() => window.matchMedia(query).matches);
@@ -69,13 +72,39 @@ function MainContent() {
     };
 
     if (loading) return (
-        <div className="h-screen w-screen flex items-center justify-center bg-gray-50 dark:bg-[#08090d]">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary"></div>
+        <div className="h-screen w-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-[#030712] relative overflow-hidden">
+            {/* Background Glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/10 blur-[120px] rounded-full animate-pulse" />
+
+            <div className="relative z-10 flex flex-col items-center gap-8">
+                <div className="relative">
+                    <div className="w-24 h-24 border-4 border-gray-200 dark:border-white/5 rounded-full" />
+                    <div
+                        className="absolute inset-0 border-4 border-transparent border-t-indigo-500 rounded-full animate-spin"
+                        style={{ borderTopColor: settings?.accentColor || '#6366f1' }}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <Zap size={32} className="text-gray-900 dark:text-white animate-pulse" style={{ color: settings?.accentColor }} />
+                    </div>
+                </div>
+
+                <div className="flex flex-col items-center gap-3">
+                    <h1 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">ProKanban Elite</h1>
+                    <div className="flex items-center gap-3">
+                        <div className="h-[2px] w-6 bg-indigo-500/30" style={{ backgroundColor: `${settings?.accentColor}30` }} />
+                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-gray-500">Initializing Workspace</span>
+                        <div className="h-[2px] w-6 bg-indigo-500/30" style={{ backgroundColor: `${settings?.accentColor}30` }} />
+                    </div>
+                </div>
+            </div>
         </div>
     );
 
-    if (!user) return <AuthGateway />;
-
+    if (!user) return (
+        <Suspense fallback={null}>
+            <AuthGateway />
+        </Suspense>
+    );
 
     return (
         <div className="flex h-screen w-screen transition-all duration-400 overflow-hidden">
@@ -114,6 +143,7 @@ function MainContent() {
                             <button
                                 type="submit"
                                 className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl shadow-lg shadow-indigo-500/20 transition-all hover:-translate-y-0.5"
+                                style={{ backgroundColor: settings.accentColor }}
                             >
                                 Save Name
                             </button>
@@ -158,12 +188,18 @@ function MainContent() {
                 />
 
                 <div className="flex-1 overflow-hidden px-4 sm:px-6 lg:px-10">
-                    <div className="h-full w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
-                        {currentView === 'board' && <BoardView />}
-                        {currentView === 'list' && <ListView />}
-                        {currentView === 'analytics' && <AnalyticsView />}
-                        {currentView === 'archive' && <ArchiveView />}
-                    </div>
+                    <Suspense fallback={
+                        <div className="h-full w-full flex items-center justify-center">
+                            <div className="w-10 h-10 border-4 border-gray-100 dark:border-white/5 border-t-indigo-500 rounded-full animate-spin" style={{ borderTopColor: settings.accentColor }} />
+                        </div>
+                    }>
+                        <div className="h-full w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            {currentView === 'board' && <BoardView />}
+                            {currentView === 'list' && <ListView />}
+                            {currentView === 'analytics' && <AnalyticsView />}
+                            {currentView === 'archive' && <ArchiveView />}
+                        </div>
+                    </Suspense>
                 </div>
             </main>
         </div>
