@@ -2,7 +2,7 @@
 
 A professional-grade, full-stack Kanban productivity dashboard built with **React 18**, **Vite**, **TailwindCSS**, and **Supabase**. Designed for high-performance task management with a focus on rich aesthetics and fluid user experience.
 
-🔗 **Live Demo**: [kanban-elite.netlify.app](https://kanban-elite.netlify.app/)
+🔗 **Live Demo**: [kanban-elite.netlify.app](https://kanban-elite-task-manager.netlify.app/)
 
 ---
 
