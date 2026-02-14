@@ -92,6 +92,7 @@ export function TaskProvider({ children }) {
         setNotifications(prev => [newNotif, ...prev.slice(0, 19)]);
     };
 
+
     const markAllRead = () => {
         setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     };
@@ -103,19 +104,26 @@ export function TaskProvider({ children }) {
             ...data,
             id: 'temp-' + Date.now(),
             owner_id: user.id,
-            subtasks: [],
+            due_date: data.due_date || data.due,
+            status: 'todo',
             created_at: new Date().toISOString(),
             is_optimistic: true
         };
 
         // Optimistic Update
+        console.log("Optimistic update triggering for:", newTask.name);
         setTasks(prev => [newTask, ...prev]);
         notify('Deploying Unit', `Initializing ${data.name}...`);
 
         const { data: insertedData, error } = await supabase
             .from('tasks')
             .insert([{
-                ...data,
+                name: data.name,
+                description: data.description,
+                priority: data.priority,
+                category: data.category,
+                due_date: data.due_date,
+                status: data.status,
                 owner_id: user.id,
                 subtasks: []
             }])
@@ -126,11 +134,15 @@ export function TaskProvider({ children }) {
             setTasks(prev => prev.filter(t => t.id !== newTask.id));
             log(`Deployment Failed: ${error.message}`, true);
             notify('Deployment Error', error.message, 'error');
-        } else {
+        } else if (insertedData && insertedData.length > 0) {
             // Replace optimistic task with real one
             setTasks(prev => prev.map(t => t.id === newTask.id ? insertedData[0] : t));
             log(`Unit Online: ${data.name}`);
             notify('Unit Active', `${data.name} is now operational.`, 'success');
+        } else {
+            // Fallback if no error but no data (unlikely but safe)
+            setTasks(prev => prev.filter(t => t.id !== newTask.id));
+            notify('Deployment Warning', 'Unit deployed but no confirmation received.', 'warning');
         }
     };
 
@@ -141,38 +153,98 @@ export function TaskProvider({ children }) {
     };
 
     const updateTaskStatus = async (id, newStatus) => {
+        // Optimistic Update
+        const taskToUpdate = tasks.find(t => t.id === id);
+        if (!taskToUpdate) return;
+
+        console.log(`Relocating unit ${id} to ${newStatus}`);
+        setTasks(prev => prev.map(t => t.id === id ? { ...t, status: newStatus } : t));
+
+        // Skip DB update for temporary optimistic tasks
+        if (id.toString().startsWith('temp-')) {
+            console.log("Postponing DB sync for temporary unit.");
+            return;
+        }
+
         const { error } = await supabase.from('tasks').update({ status: newStatus }).eq('id', id);
-        if (error) log(`Error: ${error.message}`, true);
+        if (error) {
+            // Rollback
+            setTasks(prev => prev.map(t => t.id === id ? taskToUpdate : t));
+            log(`Relocation Failed: ${error.message}`, true);
+            notify('Relocation Error', error.message, 'error');
+        } else {
+            notify('Unit Relocated', `Successfully moved to ${newStatus}.`);
+        }
     };
 
     const archiveTask = async (id) => {
+        const taskToArchive = tasks.find(t => t.id === id);
+        if (!taskToArchive) return;
+
+        // Optimistic Update
+        setTasks(prev => prev.map(t => t.id === id ? { ...t, is_archived: true, archived_at: new Date().toISOString() } : t));
+        notify('Unit Archived', 'Unit moved to secure repository.');
+
         const { error } = await supabase.from('tasks').update({
             is_archived: true,
             archived_at: new Date().toISOString()
         }).eq('id', id);
-        if (error) log(`Error: ${error.message}`, true);
-        else notify('Unit Archived', 'A task has been moved to the secure repository.');
+
+        if (error) {
+            setTasks(prev => prev.map(t => t.id === id ? taskToArchive : t));
+            log(`Archival Failed: ${error.message}`, true);
+        }
     };
 
     const restoreTask = async (id) => {
+        const taskToRestore = tasks.find(t => t.id === id);
+        if (!taskToRestore) return;
+
+        // Optimistic Update
+        setTasks(prev => prev.map(t => t.id === id ? { ...t, is_archived: false, archived_at: null } : t));
+        notify('Unit Restored', 'Unit returned to active duty.');
+
         const { error } = await supabase.from('tasks').update({
             is_archived: false,
             archived_at: null
         }).eq('id', id);
-        if (error) log(`Error: ${error.message}`, true);
+
+        if (error) {
+            setTasks(prev => prev.map(t => t.id === id ? taskToRestore : t));
+            log(`Restoration Failed: ${error.message}`, true);
+        }
     };
 
     const purgeTask = async (id) => {
+        const taskToPurge = tasks.find(t => t.id === id);
+
+        // Optimistic Update
+        setTasks(prev => prev.filter(t => t.id !== id));
+        notify('Unit Purged', 'Atomic record deletion successful.', 'warning');
+
         const { error } = await supabase.from('tasks').delete().eq('id', id);
-        if (error) log(`Error: ${error.message}`, true);
+
+        if (error) {
+            if (taskToPurge) setTasks(prev => [taskToPurge, ...prev]);
+            log(`Purge Failed: ${error.message}`, true);
+        }
     };
 
     const clearDone = async () => {
+        const completedTasks = tasks.filter(t => t.status === 'done');
+        if (completedTasks.length === 0) return;
+
+        // Optimistic Update
+        setTasks(prev => prev.filter(t => t.status !== 'done'));
+        notify('Repository Purged', 'All shipped units cleared from local sector.');
+
         const { error } = await supabase.from('tasks').delete().eq('status', 'done');
-        if (error) log(`Error: ${error.message}`, true);
-        else {
+
+        if (error) {
+            setTasks(prev => [...prev, ...completedTasks]);
+            log(`Clear Failed: ${error.message}`, true);
+        } else {
             log("Full purge of Shipped column.");
-            notify('Repository Purged', 'All completed units have been permanently cleared.');
         }
     };
 

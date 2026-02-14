@@ -40,6 +40,7 @@ function MainLayout() {
                 <main className="flex-1 flex flex-col overflow-hidden relative">
                     <TopBar
                         currentView={currentView}
+                        setView={setCurrentView}
                         theme={theme}
                         setTheme={setTheme}
                     />

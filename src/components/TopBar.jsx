@@ -1,16 +1,18 @@
 import { useState } from 'react';
-import { Search, Plus, Moon, Sun, LogOut, ChevronDown, Rocket, Target, Shield, Clock } from 'lucide-react';
+import { Search, Plus, Moon, Sun, LogOut, ChevronDown, Rocket, Target, Shield, Clock, FileText } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../context/TaskContext';
 import Modal from './Modal';
 
-function TopBar({ currentView, theme, setTheme }) {
+function TopBar({ currentView, setView, theme, setTheme }) {
     const { logout, displayName, avatarUrl } = useAuth();
     const { addTask, settings } = useTasks();
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+    const [isViewMenuOpen, setIsViewMenuOpen] = useState(false);
 
     // Task form state
     const [taskName, setTaskName] = useState('');
+    const [description, setDescription] = useState('');
     const [priority, setPriority] = useState('medium');
     const [category, setCategory] = useState('feature');
     const [dueDate, setDueDate] = useState('');
@@ -24,33 +26,81 @@ function TopBar({ currentView, theme, setTheme }) {
 
     const handleAddTask = (e) => {
         e.preventDefault();
-        if (!taskName) return;
+        console.log("Deploying Unit from TopBar, taskName:", taskName);
+        if (!taskName) {
+            alert("Identification Required: Please enter a Unit Objective Name before deployment.");
+            return;
+        }
         addTask({
             name: taskName,
+            description,
             priority,
             category,
-            due: dueDate || new Date().toISOString(),
+            due_date: dueDate || new Date().toISOString(),
             status: 'todo'
         });
         setTaskName('');
+        setDescription('');
         setDueDate('');
         setIsTaskModalOpen(false);
     };
 
+    const viewOptions = [
+        { id: 'board', label: 'Workspace Hub' },
+        { id: 'list', label: 'Detailed Inventory' },
+        { id: 'analytics', label: 'Intelligence Core' },
+        { id: 'archive', label: 'Secure Repository' }
+    ];
+
     return (
         <>
-            <header className={`px-10 py-8 flex justify-between items-center z-40 bg-transparent ${settings.density === 'compact' ? 'py-4' : 'py-8'}`}>
+            <header className={`px-10 py-8 flex justify-between items-center z-40 bg-transparent relative ${settings.density === 'compact' ? 'py-4' : 'py-8'}`}>
                 <div className="flex items-center gap-12">
-                    <div className="flex flex-col">
+                    <div className="flex flex-col relative">
                         <span className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-1">
-                            Command 01
+                            Command Center
                         </span>
-                        <div className="flex items-center gap-2 group cursor-pointer">
+                        <div
+                            className="flex items-center gap-2 group cursor-pointer"
+                            onClick={() => setIsViewMenuOpen(!isViewMenuOpen)}
+                        >
                             <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight text-gradient">
                                 {titleMap[currentView]}
                             </h1>
-                            <ChevronDown size={20} className="text-gray-300 mt-1" />
+                            <ChevronDown
+                                size={20}
+                                className={`text-gray-300 mt-1 transition-transform duration-300 ${isViewMenuOpen ? 'rotate-180' : ''}`}
+                                style={isViewMenuOpen ? { color: settings.accentColor } : {}}
+                            />
                         </div>
+
+                        {/* View Selector Dropdown */}
+                        {isViewMenuOpen && (
+                            <div className="absolute top-[100%] left-0 mt-4 w-66 bg-white/95 dark:bg-card-dark/95 border border-gray-200 dark:border-white/5 rounded-[32px] shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-200 backdrop-blur-2xl">
+                                {viewOptions.map(option => (
+                                    <button
+                                        key={option.id}
+                                        onClick={() => {
+                                            setView(option.id);
+                                            setIsViewMenuOpen(false);
+                                        }}
+                                        className={`w-full text-left px-6 py-4 rounded-2xl text-[13px] font-black transition-all duration-300 flex items-center justify-between group
+                                            ${currentView === option.id
+                                                ? 'bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white border border-gray-100 dark:border-transparent'
+                                                : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200'}`}
+                                    >
+                                        <span>{option.label}</span>
+                                        {currentView === option.id && (
+                                            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: settings.accentColor }} />
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                        {/* Overlay to close menu */}
+                        {isViewMenuOpen && (
+                            <div className="fixed inset-0 z-[-1]" onClick={() => setIsViewMenuOpen(false)} />
+                        )}
                     </div>
 
                     <div className="hidden xl:flex items-center gap-3 bg-white dark:bg-white/[0.03] px-6 py-3 rounded-2xl border border-gray-100 dark:border-white/5 focus-within:ring-2 transition-all duration-300" style={{ '--tw-ring-color': `${settings.accentColor}20` }}>
@@ -117,6 +167,21 @@ function TopBar({ currentView, theme, setTheme }) {
                             className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 p-5 rounded-[24px] outline-none focus:ring-2 focus:ring-offset-0 text-gray-900 dark:text-white font-bold transition-all"
                             style={{ '--tw-ring-color': settings.accentColor }}
                             required
+                        />
+                    </div>
+
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">
+                            <FileText size={14} />
+                            <span>Strategic Brief</span>
+                        </div>
+                        <textarea
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="Detailed operational context..."
+                            rows={3}
+                            className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 p-5 rounded-[24px] outline-none focus:ring-2 focus:ring-offset-0 text-gray-900 dark:text-white font-medium text-sm transition-all resize-none"
+                            style={{ '--tw-ring-color': settings.accentColor }}
                         />
                     </div>
 

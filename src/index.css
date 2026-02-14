@@ -4,11 +4,13 @@
 
 :root {
     --primary-color: #6366f1;
+    --color-primary: #6366f1;
+    --color-accent: #a855f7;
 }
 
 @layer base {
     body {
-        @apply font-['Plus_Jakarta_Sans'] bg-[#f8f9ff] text-[#0f172a] transition-all duration-500 selection:bg-primary selection:text-white overflow-hidden;
+        @apply font-['Plus_Jakarta_Sans'] bg-[#f1f3f9] text-[#1e293b] transition-all duration-500 selection:bg-primary selection:text-white overflow-hidden;
     }
 
     [data-theme='dark'] body {
@@ -101,4 +103,38 @@
 
 .animate-slide-up {
     animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes scan {
+    0% {
+        transform: translateY(0);
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(800px);
+        opacity: 0;
+    }
+}
+
+.animate-scan-fast {
+    animation: scan 2s linear infinite;
+}
+
+@keyframes progress-sync {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(200%);
+    }
+}
+
+.animate-progress {
+    animation: progress-sync 2.5s ease-in-out infinite;
 }

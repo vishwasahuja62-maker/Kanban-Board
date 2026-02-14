@@ -7,6 +7,13 @@ function TaskCard({ task }) {
 
     const handleDragStart = (e) => {
         e.dataTransfer.setData('taskId', task.id);
+        e.dataTransfer.effectAllowed = 'move';
+        // Add a class for styling while dragging
+        e.currentTarget.classList.add('opacity-30', 'scale-95');
+    };
+
+    const handleDragEnd = (e) => {
+        e.currentTarget.classList.remove('opacity-30', 'scale-95');
     };
 
     const priorityStyles = {
@@ -26,6 +33,7 @@ function TaskCard({ task }) {
         <div
             draggable
             onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
             className={`group relative bg-white dark:bg-[#0d1117] p-5 rounded-[24px] border border-gray-100 dark:border-white/5 premium-shadow hover:hover:-translate-y-1.5 transition-all duration-500 cursor-grab active:cursor-grabbing overflow-hidden neon-border`}
         >
             {/* Decorative Gradient Background */}
@@ -72,7 +80,7 @@ function TaskCard({ task }) {
                     <div className="flex justify-between items-center pt-2">
                         <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400">
                             <Calendar size={12} />
-                            <span>{task.due ? new Date(task.due).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'No label'}</span>
+                            <span>{(task.due_date || task.due) ? new Date(task.due_date || task.due).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'No label'}</span>
                         </div>
 
                         <div className="relative group/avatar">
