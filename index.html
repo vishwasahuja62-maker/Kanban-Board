@@ -164,7 +164,7 @@
                 </table>
             </div>
 
-            <!-- Analytics View (New Real-World Problem Solution) -->
+            <!-- Analytics View -->
             <div class="analytics-view" id="analytics-view" style="display: none; padding: 2.5rem;">
                 <div class="analytics-grid">
                     <div class="stat-card">
@@ -185,6 +185,27 @@
                     <h3>Subtask Completion Rate</h3>
                     <div id="subtask-master-progress" class="master-progress-ring"></div>
                 </div>
+            </div>
+
+            <!-- Archive View -->
+            <div class="list-view-container" id="archive-view" style="display: none;">
+                <div class="col-header" style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.2rem; font-weight: 800;">Archive Repository</h2>
+                    <button class="btn-clear" onclick="app.purgeArchive()">Purge All</button>
+                </div>
+                <table class="list-table">
+                    <thead>
+                        <tr>
+                            <th>Intelligence</th>
+                            <th>Lead</th>
+                            <th>Status</th>
+                            <th>Type</th>
+                            <th>Archived At</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="archive-body"></tbody>
+                </table>
             </div>
         </main>
     </div>
@@ -254,6 +275,23 @@
                     <button type="submit" class="btn-save">Commit Task</button>
                 </footer>
             </form>
+        </div>
+    </div>
+
+    <!-- Custom Professional Prompt Modal -->
+    <div class="modal" id="confirm-modal">
+        <div class="modal-bg" style="background: rgba(0,0,0,0.7); backdrop-filter: blur(12px);"></div>
+        <div class="modal-box" style="max-width: 400px; text-align: center;">
+            <div class="prompt-icon" id="confirm-icon" style="font-size: 2.5rem; margin-bottom: 1.5rem;">⚠️</div>
+            <h2 id="confirm-title" style="margin-bottom: 0.8rem;">Are you sure?</h2>
+            <p id="confirm-msg" style="color: var(--text-muted); margin-bottom: 2rem; font-weight: 500;">
+                This action will modify your workspace repository permanently.
+            </p>
+            <div class="form-footer">
+                <button type="button" class="btn-cancel" id="confirm-cancel">Abort</button>
+                <button type="button" class="btn-save" id="confirm-proceed"
+                    style="background: #ef4444; box-shadow: 0 10px 20px -5px rgba(239, 68, 68, 0.3);">Execute</button>
+            </div>
         </div>
     </div>
 

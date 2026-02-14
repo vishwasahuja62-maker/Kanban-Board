@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply font-['Plus_Jakarta_Sans'] bg-app-light text-[#0f172a] transition-colors duration-300;
+    }
+
+    [data-theme='dark'] body {
+        @apply bg-app-dark text-[#f9fafb];
+    }
+}
+
+.mesh-bg {
+    @apply fixed inset-0 z-[-1] pointer-events-none overflow-hidden;
+}
+
+.blob {
+    @apply absolute w-[800px] h-[800px] rounded-full blur-[120px] opacity-[0.1];
+    animation: float 40s infinite alternate;
+}
+
+@keyframes float {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    100% {
+        transform: translate(100px, 80px);
+    }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    @apply w-[5px] h-[5px];
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-gray-200 rounded-full;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+    @apply bg-gray-700;
+}

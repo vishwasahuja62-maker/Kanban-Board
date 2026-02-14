@@ -6,6 +6,7 @@
 class ProKanban {
     constructor() {
         this.tasks = JSON.parse(localStorage.getItem('pk_elite_tasks')) || [];
+        this.archivedTasks = JSON.parse(localStorage.getItem('pk_elite_archived')) || [];
         this.history = JSON.parse(localStorage.getItem('pk_elite_logs')) || ["Genesis workspace initialized."];
         this.currentUser = JSON.parse(localStorage.getItem('pk_current_user')) || null;
 
@@ -15,10 +16,10 @@ class ProKanban {
         this.dragId = null;
 
         this.avatars = [
-            { id: 'u1', name: 'Felix', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix' },
-            { id: 'u2', name: 'Aneka', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka' },
-            { id: 'u3', name: 'Jasper', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jasper' },
-            { id: 'u4', name: 'Luna', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Luna' }
+            { id: 'u1', name: 'Felix', url: 'https://api.dicebear.com/7.x/notionists/svg?seed=Felix' },
+            { id: 'u2', name: 'Aneka', url: 'https://api.dicebear.com/7.x/notionists/svg?seed=Aneka' },
+            { id: 'u3', name: 'Jasper', url: 'https://api.dicebear.com/7.x/notionists/svg?seed=Jasper' },
+            { id: 'u4', name: 'Luna', url: 'https://api.dicebear.com/7.x/notionists/svg?seed=Luna' }
         ];
 
         this.init();
@@ -32,6 +33,7 @@ class ProKanban {
             this.renderLogs();
             this.renderAvatarSelector();
             this.setupEventListeners();
+            this.startBackgroundServices();
         } catch (e) {
             console.error("ProKanban initialization failed:", e);
         }
@@ -53,7 +55,7 @@ class ProKanban {
             userAvatar = {
                 id: 'gen-' + Date.now(),
                 name: username,
-                url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`
+                url: `https://api.dicebear.com/7.x/notionists/svg?seed=${username}`
             };
         }
 
@@ -97,15 +99,119 @@ class ProKanban {
     // --- State & Persistence ---
     save() {
         localStorage.setItem('pk_elite_tasks', JSON.stringify(this.tasks));
+        localStorage.setItem('pk_elite_archived', JSON.stringify(this.archivedTasks));
         localStorage.setItem('pk_elite_logs', JSON.stringify(this.history));
         this.render();
         this.renderLogs();
     }
 
-    log(msg) {
+    // --- Professional Prompt Engine ---
+    customConfirm(title, msg, icon = '⚠️') {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('confirm-modal');
+            const titleEl = document.getElementById('confirm-title');
+            const msgEl = document.getElementById('confirm-msg');
+            const iconEl = document.getElementById('confirm-icon');
+            const btnCancel = document.getElementById('confirm-cancel');
+            const btnProceed = document.getElementById('confirm-proceed');
+
+            titleEl.innerText = title;
+            msgEl.innerText = msg;
+            iconEl.innerText = icon;
+            modal.classList.add('active');
+
+            const cleanup = (val) => {
+                modal.classList.remove('active');
+                btnCancel.removeEventListener('click', onCancel);
+                btnProceed.removeEventListener('click', onProceed);
+                resolve(val);
+            };
+
+            const onCancel = () => cleanup(false);
+            const onProceed = () => cleanup(true);
+
+            btnCancel.addEventListener('click', onCancel);
+            btnProceed.addEventListener('click', onProceed);
+        });
+    }
+
+    // --- Background Operations Hub ---
+    startBackgroundServices() {
+        console.log("Heartbeat Service: Operational");
+        // Check every 5 minutes
+        setInterval(() => this.runHeartbeat(), 5 * 60 * 1000);
+        // Initial run
+        setTimeout(() => this.runHeartbeat(), 2000);
+    }
+
+    runHeartbeat() {
+        if (!this.currentUser) return;
+        this.checkDeadlines();
+        this.watchStaleTasks();
+        this.optimizeStorage();
+        this.rebalanceWorkload();
+    }
+
+    checkDeadlines() {
+        const now = new Date();
+        const tomorrow = new Date(now.getTime() + (24 * 60 * 60 * 1000));
+
+        this.tasks.forEach(task => {
+            if (task.due && task.status !== 'done') {
+                const dueDate = new Date(task.due);
+                if (dueDate > now && dueDate <= tomorrow) {
+                    if (!this.history.some(log => log.includes(`CRITICAL DEADLINE: ${task.name}`))) {
+                        this.log(`CRITICAL DEADLINE: ${task.name} is due within 24 hours!`, true);
+                    }
+                }
+            }
+        });
+    }
+
+    watchStaleTasks() {
+        const now = Date.now();
+        const staleLimit = 48 * 60 * 60 * 1000; // 48 Hours
+
+        this.tasks.forEach(task => {
+            if (task.status === 'inprogress') {
+                // Approximate age from ID if no updated field
+                const age = task.updatedAt ? (now - new Date(task.updatedAt).getTime()) : (now - parseInt(task.id.split('-')[1]));
+                if (age > staleLimit) {
+                    if (!this.history.some(log => log.includes(`STALE UNIT: ${task.name}`))) {
+                        this.log(`STALE UNIT: ${task.name} has been in Processing for over 48h. Examine for bottlenecks.`, true);
+                    }
+                }
+            }
+        });
+    }
+
+    rebalanceWorkload() {
+        const userTasks = this.getUserTasks();
+        const counts = { todo: 0, inprogress: 0, done: 0 };
+        userTasks.forEach(t => counts[t.status]++);
+
+        const activeTotal = counts.todo + counts.inprogress;
+        if (activeTotal > 5) { // Threshold for "High Workload"
+            if (!this.history.some(log => log.includes("HIGH CAPACITY ALERT"))) {
+                this.log("HIGH CAPACITY ALERT: Active load exceeding nominal thresholds. consider rebalancing tasks.");
+            }
+        }
+    }
+
+    optimizeStorage() {
+        // Keep only top 50 logs to prevent storage bloating
+        if (this.history.length > 50) {
+            this.history = this.history.slice(0, 50);
+            localStorage.setItem('pk_elite_logs', JSON.stringify(this.history));
+            console.log("Storage Service: Pruned historical logs.");
+        }
+    }
+
+    log(msg, urgent = false) {
         const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        this.history.unshift(`[${time}] ${msg}`);
-        if (this.history.length > 25) this.history.pop();
+        const prefix = urgent ? "🚨 " : "";
+        this.history.unshift(`[${time}] ${prefix}${msg}`);
+        this.renderLogs();
         localStorage.setItem('pk_elite_logs', JSON.stringify(this.history));
     }
 
@@ -114,13 +220,25 @@ class ProKanban {
         if (event) event.preventDefault();
         this.currentView = view;
 
-        const views = ['board-view', 'list-view', 'analytics-view'];
+        const views = ['board-view', 'list-view', 'analytics-view', 'archive-view'];
         views.forEach(v => {
             const el = document.getElementById(v);
-            if (el) el.style.display = (v === view || v.startsWith(view)) ? (view === 'analytics' ? 'block' : 'flex') : 'none';
+            if (el) {
+                const isSelected = (v === view || v.startsWith(view));
+                if (isSelected) {
+                    el.style.display = (view === 'board') ? 'grid' : 'block';
+                } else {
+                    el.style.display = 'none';
+                }
+            }
         });
 
-        const titleMap = { 'board': 'Main Board', 'list': 'Detailed View', 'analytics': 'Business Insights' };
+        const titleMap = {
+            'board': 'Main Board',
+            'list': 'Detailed View',
+            'analytics': 'Business Insights',
+            'archive': 'Archive Repository'
+        };
         const titleEl = document.getElementById('current-view-title');
         if (titleEl) titleEl.innerText = titleMap[view] || 'Workspace';
 
@@ -135,13 +253,21 @@ class ProKanban {
     setFilter(type, event) {
         if (event) event.preventDefault();
         this.activeFilter = this.activeFilter === type ? null : type;
+
+        // Update UI state for sidebar items
+        document.querySelectorAll('.nav-group a').forEach(el => {
+            if (el.innerText.includes('Urgent Focus')) {
+                el.classList.toggle('active', this.activeFilter === 'high');
+            }
+        });
+
         this.render();
-        this.log(`Applied layer: ${type || 'full exposure'}`);
+        this.log(`Critical layer: ${this.activeFilter === 'high' ? 'High Urgency Focus' : 'Standard Exposure'}`);
     }
 
     showArchive(event) {
         if (event) event.preventDefault();
-        alert("Archive Repository is currently in read-only genesis mode.");
+        this.switchView('archive');
     }
 
     // --- Dynamic Renderers ---
@@ -153,6 +279,7 @@ class ProKanban {
         if (this.currentView === 'board') this.renderBoard();
         else if (this.currentView === 'list') this.renderList();
         else if (this.currentView === 'analytics') this.renderAnalytics();
+        else if (this.currentView === 'archive') this.renderArchive();
 
         if (window.lucide) lucide.createIcons();
     }
@@ -217,7 +344,12 @@ class ProKanban {
             const container = document.getElementById(`list-${status}`);
             if (!container) return;
             container.innerHTML = "";
-            const filtered = userTasks.filter(t => t.status === status && t.name.toLowerCase().includes(search));
+            let filtered = userTasks.filter(t => t.status === status && t.name.toLowerCase().includes(search));
+
+            if (this.activeFilter === 'high') {
+                filtered = filtered.filter(t => t.priority === 'high');
+            }
+
             filtered.forEach(task => container.appendChild(this.createTaskCard(task)));
             const badge = document.getElementById(`badge-${status}`);
             if (badge) badge.innerText = filtered.length;
@@ -228,23 +360,63 @@ class ProKanban {
         const tbody = document.getElementById('list-body');
         if (!tbody) return;
         tbody.innerHTML = "";
-        const userTasks = this.getUserTasks();
+        let userTasks = this.getUserTasks();
+
+        if (this.activeFilter === 'high') {
+            userTasks = userTasks.filter(t => t.priority === 'high');
+        }
+
         userTasks.forEach(task => {
             const row = document.createElement('tr');
-            const avatar = this.avatars.find(a => a.id === task.assignee)?.url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${task.ownerId}`;
+            const avatar = this.avatars.find(a => a.id === task.assignee)?.url || `https://api.dicebear.com/7.x/notionists/svg?seed=${task.ownerId}`;
             row.innerHTML = `
                 <td><div style="font-weight:700">${task.name}</div></td>
-                <td><img src="${avatar}" class="u-avatar" style="width:24px; height:24px"></td>
-                <td><span class="badge" style="background:var(--primary-light); color:var(--primary)">${task.status}</span></td>
+                <td><img src="${avatar}" class="u-avatar"></td>
+                <td><span class="status-badge">${task.status}</span></td>
                 <td><span class="category-badge cat-${task.category}">${task.category}</span></td>
                 <td>${task.due ? this.formatDate(task.due) : '-'}</td>
-                <td>
-                    <button class="btn-icon-nav" style="width:32px; height:32px" onclick="app.openEditModal('${task.id}')"><i data-lucide="edit-3"></i></button>
-                    <button class="btn-icon-nav" style="width:32px; height:32px; color:#ef4444" onclick="app.deleteTask('${task.id}')"><i data-lucide="trash-2"></i></button>
+                <td class="action-cell">
+                    <div class="actions-wrapper">
+                        <button class="btn-icon-nav" onclick="app.openEditModal('${task.id}')"><i data-lucide="edit-3"></i></button>
+                        <button class="btn-icon-nav" style="color:#ef4444" onclick="app.deleteTask('${task.id}')"><i data-lucide="trash-2"></i></button>
+                    </div>
                 </td>
             `;
             tbody.appendChild(row);
         });
+    }
+
+    renderArchive() {
+        const tbody = document.getElementById('archive-body');
+        if (!tbody) return;
+        tbody.innerHTML = "";
+
+        const userArchived = this.archivedTasks.filter(t => t.ownerId === this.currentUser.id);
+
+        if (userArchived.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 3rem; color: var(--text-muted)">No intelligence units in archive.</td></tr>`;
+            return;
+        }
+
+        userArchived.forEach(task => {
+            const row = document.createElement('tr');
+            const avatar = this.avatars.find(a => a.id === task.assignee)?.url || `https://api.dicebear.com/7.x/notionists/svg?seed=${task.ownerId}`;
+            row.innerHTML = `
+                <td><div style="font-weight:700">${task.name}</div></td>
+                <td><img src="${avatar}" class="u-avatar"></td>
+                <td><span class="status-badge">${task.status}</span></td>
+                <td><span class="category-badge cat-${task.category}">${task.category}</span></td>
+                <td>${task.archivedAt ? this.formatDate(task.archivedAt) : '-'}</td>
+                <td class="action-cell">
+                    <div class="actions-wrapper">
+                        <button class="btn-icon-nav" title="Restore Task" onclick="app.restoreTask('${task.id}')"><i data-lucide="refresh-cw"></i></button>
+                        <button class="btn-icon-nav" style="color:#ef4444" title="Purge Permanently" onclick="app.purgeTask('${task.id}')"><i data-lucide="trash-2"></i></button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+        if (window.lucide) lucide.createIcons();
     }
 
     createTaskCard(task) {
@@ -254,7 +426,7 @@ class ProKanban {
         const total = task.subtasks?.length || 0;
         const done = task.subtasks?.filter(s => s.done).length || 0;
         const pct = total === 0 ? 0 : (done / total) * 100;
-        const avatar = this.avatars.find(a => a.id === task.assignee)?.url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${task.ownerId}`;
+        const avatar = this.avatars.find(a => a.id === task.assignee)?.url || `https://api.dicebear.com/7.x/notionists/svg?seed=${task.ownerId}`;
 
         div.innerHTML = `
             <div class="task-top" style="display:flex; justify-content:space-between; align-items:flex-start">
@@ -269,7 +441,7 @@ class ProKanban {
             <h4>${task.name}</h4>
             <div class="task-footer">
                 <span class="pri-tag p-${task.priority}">${task.priority}</span>
-                <img src="${avatar}" class="u-avatar" style="width:24px; height:24px">
+                <img src="${avatar}" class="u-avatar">
             </div>
         `;
         div.addEventListener('dragstart', () => { this.dragId = task.id; });
@@ -338,13 +510,14 @@ class ProKanban {
         };
 
         if (id) {
-            this.tasks = this.tasks.map(t => t.id === id ? { ...t, ...data } : t);
+            this.tasks = this.tasks.map(t => t.id === id ? { ...t, ...data, updatedAt: new Date().toISOString() } : t);
         } else {
             this.tasks.push({
                 id: 'T-' + Date.now(),
                 status: 'todo',
                 ...data,
-                subtasks: []
+                subtasks: [],
+                updatedAt: new Date().toISOString()
             });
         }
         this.save();
@@ -357,10 +530,10 @@ class ProKanban {
         const subRoot = document.getElementById('subtask-list');
         if (!subRoot) return;
         subRoot.innerHTML = (task.subtasks || []).map((s, idx) => `
-            <div class="subtask-item" style="display:flex; align-items:center; gap:10px; margin-bottom:10px">
+            <div class="subtask-item">
                 <input type="checkbox" ${s.done ? 'checked' : ''} onchange="app.toggleSubtask('${task.id}', ${idx})">
-                <span style="flex:1; font-size:0.85rem">${s.text}</span>
-                <button type="button" onclick="app.removeSubtask('${task.id}', ${idx})" style="color:#ef4444; border:none; background:none; cursor:pointer">&times;</button>
+                <span>${s.text}</span>
+                <button type="button" class="btn-remove-sub" onclick="app.removeSubtask('${task.id}', ${idx})">&times;</button>
             </div>
         `).join('');
     }
@@ -398,19 +571,51 @@ class ProKanban {
     }
 
     // --- Utility Hub ---
-    deleteTask(id) {
-        if (confirm("Permanently archive this task?")) {
-            this.tasks = this.tasks.filter(t => t.id !== id);
-            this.log(`Archived task ID ${id}`);
+    async deleteTask(id) {
+        if (await this.customConfirm("Relocate to Archive?", "Are you sure you want to move this intelligence unit to the Archive Box?", "📦")) {
+            const taskIndex = this.tasks.findIndex(t => t.id === id);
+            if (taskIndex > -1) {
+                const task = this.tasks.splice(taskIndex, 1)[0];
+                task.archivedAt = new Date().toISOString();
+                this.archivedTasks.unshift(task);
+                this.log(`Archived unit: ${task.name}`);
+                this.save();
+            }
+        }
+    }
+
+    restoreTask(id) {
+        const taskIndex = this.archivedTasks.findIndex(t => t.id === id);
+        if (taskIndex > -1) {
+            const task = this.archivedTasks.splice(taskIndex, 1)[0];
+            delete task.archivedAt;
+            this.tasks.push(task);
+            this.log(`Restored unit from archive: ${task.name}`);
             this.save();
         }
     }
 
-    clearDone() {
-        if (confirm("Purge all completed units from the workspace?")) {
-            this.tasks = this.tasks.filter(t => !(t.status === 'done' && t.ownerId === this.currentUser.id));
+    async purgeTask(id) {
+        if (await this.customConfirm("Permanent Purge?", "This intelligence unit will be permanently destroyed. This action is irreversible.", "🔥")) {
+            this.archivedTasks = this.archivedTasks.filter(t => t.id !== id);
+            this.log(`Permanent purge: ID ${id}`);
             this.save();
-            this.log("Purged completed repository.");
+        }
+    }
+
+    async purgeArchive() {
+        if (await this.customConfirm("Total Repository Purge?", "CRITICAL: You are about to destroy the entire Archive Repository. This data cannot be recovered.", "🚨")) {
+            this.archivedTasks = this.archivedTasks.filter(t => t.ownerId !== this.currentUser.id);
+            this.log("Comprehensive Archive Purge completed.");
+            this.save();
+        }
+    }
+
+    async clearDone() {
+        if (await this.customConfirm("Purge Shipped?", "This will remove all completed tasks from the board without archiving them. Proceed?")) {
+            this.tasks = this.tasks.filter(t => t.status !== 'done');
+            this.log("Full purge of Shipped column.");
+            this.save();
         }
     }
 
@@ -441,12 +646,18 @@ class ProKanban {
     onDragOver(e) { e.preventDefault(); }
     onDrop(e, status) {
         if (this.dragId) {
-            const t = this.tasks.find(x => x.id === this.dragId);
-            if (t && t.status !== status) {
-                t.status = status;
-                this.log(`Transitioned ${t.name} to ${status}`);
-                this.save();
-            }
+            this.updateTaskStatus(this.dragId, status);
+        }
+    }
+
+    async updateTaskStatus(id, newStatus) {
+        const task = this.tasks.find(t => t.id === id);
+        if (task) {
+            const oldStatus = task.status;
+            task.status = newStatus;
+            task.updatedAt = new Date().toISOString();
+            this.log(`Transitioned ${task.name} to ${newStatus}`);
+            this.save();
         }
     }
 
