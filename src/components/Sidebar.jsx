@@ -39,13 +39,13 @@ function Sidebar({ currentView, setView, isCollapsed, setIsCollapsed, isMobile, 
                 <div className={`flex items-center transition-all duration-500 ${isCollapsed ? 'p-4 flex-col gap-2' : 'p-6 pb-8 gap-3'}`}>
                     <img
                         src="/logo.png"
-                        alt="Kanban Board"
+                        alt="ProKanban Elite"
                         className={`shrink-0 transition-all duration-500 rounded-2xl shadow-lg object-contain ${isCollapsed ? 'w-11 h-11' : 'w-10 h-10'}`}
                     />
                     {!isCollapsed && (
                         <div className="flex-1 overflow-hidden min-w-0">
                             <h2 className="text-base font-black tracking-tight text-gray-900 dark:text-white leading-none whitespace-nowrap">
-                                Kanban Board
+                                ProKanban Elite
                             </h2>
                             <span className="text-[8px] font-black uppercase tracking-widest mt-1 block opacity-70 whitespace-nowrap" style={{ color: settings.accentColor }}>
                                 Organize. Track. Achieve.

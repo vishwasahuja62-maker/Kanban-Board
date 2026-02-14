@@ -1,4 +1,4 @@
-# 🚀 Kanban Board - Project Management Dashboard
+# 🚀 ProKanban Elite – Task Manager
 
 A modern, responsive, and feature-rich project management tool built with React and TailwindCSS. This application provides a seamless experience for managing tasks with a beautiful UI and smooth interactions.
 
