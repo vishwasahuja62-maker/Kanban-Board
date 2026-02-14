@@ -211,7 +211,7 @@ function Sidebar({ currentView, setView, isCollapsed, setIsCollapsed, isMobile, 
                     <section className="space-y-6">
                         <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">Profile</h4>
                         <div className="space-y-4">
-                            <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
+                            <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 text-center sm:text-left">
                                 <div className="relative group/avatar">
                                     <img
                                         src={`https://api.dicebear.com/7.x/notionists/svg?seed=${user?.user_metadata?.avatar_seed || user?.id}`}
@@ -256,7 +256,7 @@ function Sidebar({ currentView, setView, isCollapsed, setIsCollapsed, isMobile, 
 
                     <section className="space-y-4">
                         <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">Theme Color</h4>
-                        <div className="flex gap-3">
+                        <div className="flex flex-wrap gap-3">
                             {colors.map(c => (
                                 <button
                                     key={c.value}
@@ -270,7 +270,7 @@ function Sidebar({ currentView, setView, isCollapsed, setIsCollapsed, isMobile, 
                         </div>
                     </section>
 
-                    <div className="grid grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                         <section className="space-y-4">
                             <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">View Density</h4>
                             <div className="flex bg-gray-50 dark:bg-white/5 p-1 rounded-2xl border border-gray-100 dark:border-white/5">
@@ -370,14 +370,14 @@ function Sidebar({ currentView, setView, isCollapsed, setIsCollapsed, isMobile, 
                         </div>
                     ) : (
                         notifications.map(n => (
-                            <div key={n.id} className="p-5 glass-card rounded-[24px] flex gap-4 transition-all hover:translate-x-1">
+                            <div key={n.id} className="p-4 md:p-5 glass-card rounded-[24px] flex gap-3 md:gap-4 transition-all hover:translate-x-1">
                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${n.type === 'error' ? 'bg-red-500/10 text-red-500' : 'bg-primary/10 text-primary'
                                     }`} style={n.type !== 'error' ? { backgroundColor: `${settings.accentColor}15`, color: settings.accentColor } : {}}>
                                     {n.title.includes('New') ? <User size={18} /> : n.title.includes('Archived') ? <Archive size={18} /> : <Info size={18} />}
                                 </div>
-                                <div>
-                                    <h5 className="font-black text-[13px] text-gray-900 dark:text-white mb-0.5">{n.title}</h5>
-                                    <p className="text-[11px] text-gray-500 font-medium leading-relaxed">{n.message}</p>
+                                <div className="min-w-0 flex-1">
+                                    <h5 className="font-black text-[13px] text-gray-900 dark:text-white mb-0.5 truncate">{n.title}</h5>
+                                    <p className="text-[11px] text-gray-500 font-medium leading-relaxed break-words">{n.message}</p>
                                     <span className="text-[9px] font-bold text-gray-400 mt-2 block uppercase tracking-tighter">
                                         {new Date(n.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </span>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTasks } from '../context/ProjectContext';
 import TaskCard from './TaskCard';
 import { Plus, Target, Zap, Calendar, FileText, Activity } from 'lucide-react';
@@ -6,6 +6,7 @@ import { DndContext, useDroppable, useSensor, useSensors, PointerSensor, TouchSe
 import Modal from './Modal';
 
 function Column({ title, status, tasks, onTaskClick }) {
+    // ... (unchanged)
     const { isOver, setNodeRef } = useDroppable({
         id: status,
     });
@@ -99,8 +100,19 @@ function Column({ title, status, tasks, onTaskClick }) {
 }
 
 function BoardView() {
-    const { tasks, activeFilter, settings, loading, updateTaskStatus } = useTasks();
+    const { tasks, activeFilter, settings, loading, updateTaskStatus, updateTask } = useTasks();
     const [selectedTask, setSelectedTask] = useState(null);
+    const [editedTask, setEditedTask] = useState(null);
+
+    useEffect(() => {
+        if (selectedTask) setEditedTask({ ...selectedTask });
+    }, [selectedTask]);
+
+    const handleSave = async () => {
+        if (!editedTask) return;
+        await updateTask(editedTask.id, editedTask);
+        setSelectedTask(null);
+    };
 
     // Setup sensors for Drag and Drop
     // We use a delay on TouchSensor to allow scrolling, user must press and hold for 250ms to drag
@@ -197,66 +209,103 @@ function BoardView() {
             <Modal
                 isOpen={!!selectedTask}
                 onClose={() => setSelectedTask(null)}
-                title="Task Overview"
+                title="Edit Task"
             >
-                {selectedTask && (
-                    <div className="space-y-10 p-2">
-                        <div className="flex items-start justify-between">
+                {editedTask && (
+                    <div className="space-y-8 p-1">
+                        {/* Header Inputs */}
+                        <div className="space-y-6">
                             <div className="space-y-2">
-                                <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{selectedTask.name}</h3>
-                                <div className="flex items-center gap-3">
-                                    <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full border ${categoryColors[selectedTask.category]}`}>
-                                        {selectedTask.category}
-                                    </span>
-                                    <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full ${priorityColors[selectedTask.priority]}`}>
-                                        {selectedTask.priority} Risk
-                                    </span>
+                                <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">Task Name</label>
+                                <input
+                                    type="text"
+                                    value={editedTask.name}
+                                    onChange={(e) => setEditedTask({ ...editedTask, name: e.target.value })}
+                                    className="w-full bg-transparent text-2xl md:text-3xl font-black text-gray-900 dark:text-white border-b-2 border-gray-100 dark:border-white/10 pb-2 focus:border-primary focus:outline-none transition-colors"
+                                />
+                            </div>
+
+                            <div className="flex flex-wrap gap-4">
+                                <div className="space-y-1.5 flex-1 min-w-[120px]">
+                                    <label className="text-[9px] font-black uppercase text-gray-400 tracking-widest pl-1">Category</label>
+                                    <select
+                                        value={editedTask.category}
+                                        onChange={(e) => setEditedTask({ ...editedTask, category: e.target.value })}
+                                        className="w-full bg-gray-50 dark:bg-white/5 rounded-xl px-4 py-3 text-sm font-bold border-none outline-none focus:ring-2 focus:ring-primary/20 appearance-none text-gray-700 dark:text-gray-200"
+                                    >
+                                        {['feature', 'bug', 'design', 'research'].map(c => (
+                                            <option key={c} value={c} className="bg-white dark:bg-gray-900">{c.toUpperCase()}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="space-y-1.5 flex-1 min-w-[120px]">
+                                    <label className="text-[9px] font-black uppercase text-gray-400 tracking-widest pl-1">Priority</label>
+                                    <select
+                                        value={editedTask.priority}
+                                        onChange={(e) => setEditedTask({ ...editedTask, priority: e.target.value })}
+                                        className="w-full bg-gray-50 dark:bg-white/5 rounded-xl px-4 py-3 text-sm font-bold border-none outline-none focus:ring-2 focus:ring-primary/20 appearance-none text-gray-700 dark:text-gray-200"
+                                    >
+                                        {['low', 'medium', 'high'].map(p => (
+                                            <option key={p} value={p} className="bg-white dark:bg-gray-900">{p.toUpperCase()}</option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
-                            <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-3xl border border-gray-100 dark:border-white/10">
-                                <Activity size={24} className="text-primary" style={{ color: settings.accentColor }} />
+                        </div>
+
+                        {/* Status & Date */}
+                        <div className="grid grid-cols-2 gap-4 md:gap-6">
+                            <div className="p-4 md:p-6 bg-gray-50 dark:bg-white/[0.02] rounded-[24px] border border-gray-100 dark:border-white/5 space-y-2">
+                                <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
+                                    <Calendar size={14} /> Due Date
+                                </span>
+                                <input
+                                    type="date"
+                                    value={editedTask.due_date ? editedTask.due_date.split('T')[0] : ''}
+                                    onChange={(e) => setEditedTask({ ...editedTask, due_date: e.target.value })}
+                                    className="bg-transparent font-bold text-gray-900 dark:text-white text-sm outline-none w-full"
+                                />
+                            </div>
+                            <div className="p-4 md:p-6 bg-gray-50 dark:bg-white/[0.02] rounded-[24px] border border-gray-100 dark:border-white/5 space-y-2">
+                                <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
+                                    <Target size={14} /> Status
+                                </span>
+                                <select
+                                    value={editedTask.status}
+                                    onChange={(e) => setEditedTask({ ...editedTask, status: e.target.value })}
+                                    className="bg-transparent font-bold text-gray-900 dark:text-white text-sm outline-none w-full appearance-none capitalize"
+                                >
+                                    {['todo', 'inprogress', 'done'].map(s => (
+                                        <option key={s} value={s} className="bg-white dark:bg-gray-900">{s === 'inprogress' ? 'In Progress' : s}</option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6">
-                            <div className="p-6 bg-gray-50 dark:bg-white/[0.02] rounded-[32px] border border-gray-100 dark:border-white/5 space-y-3">
-                                <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
-                                    <Calendar size={14} /> Created On
-                                </span>
-                                <p className="text-sm font-black text-gray-900 dark:text-white">
-                                    {new Date(selectedTask.created_at).toLocaleDateString(undefined, { dateStyle: 'long' })}
-                                </p>
-                            </div>
-                            <div className="p-6 bg-gray-50 dark:bg-white/[0.02] rounded-[32px] border border-gray-100 dark:border-white/5 space-y-3">
-                                <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
-                                    <Target size={14} /> Current Status
-                                </span>
-                                <p className="text-sm font-black text-gray-900 dark:text-white capitalize">
-                                    {selectedTask.status === 'inprogress' ? 'In Progress' : selectedTask.status}
-                                </p>
-                            </div>
-                        </div>
-
+                        {/* Description */}
                         <div className="space-y-4">
                             <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-2 px-1">
                                 <FileText size={14} /> Description
                             </span>
-                            <div className="p-8 bg-gray-50 dark:bg-white/5 rounded-[40px] border border-gray-100 dark:border-white/10 min-h-[160px]">
-                                <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm font-medium italic">
-                                    {selectedTask.description || "No specific details provided for this task."}
-                                </p>
-                            </div>
+                            <textarea
+                                value={editedTask.description || ''}
+                                onChange={(e) => setEditedTask({ ...editedTask, description: e.target.value })}
+                                className="w-full p-6 md:p-8 bg-gray-50 dark:bg-white/5 rounded-[32px] border border-gray-100 dark:border-white/10 min-h-[160px] text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none leading-relaxed"
+                                placeholder="Add detailed task description..."
+                            />
                         </div>
 
+                        {/* Actions */}
                         <div className="flex gap-4 pt-4">
                             <button
                                 onClick={() => setSelectedTask(null)}
-                                className="flex-1 py-5 rounded-[24px] bg-gray-100 dark:bg-white/5 text-gray-500 font-extrabold uppercase text-[11px] tracking-widest hover:bg-gray-200 dark:hover:bg-white/10 transition-all"
+                                className="flex-1 py-4 md:py-5 rounded-[24px] bg-gray-100 dark:bg-white/5 text-gray-500 font-extrabold uppercase text-[10px] md:text-[11px] tracking-widest hover:bg-gray-200 dark:hover:bg-white/10 transition-all"
                             >
-                                Close Details
+                                Cancel
                             </button>
                             <button
-                                className="flex-1 py-5 rounded-[24px] text-white font-extrabold uppercase text-[11px] tracking-widest shadow-xl transition-all hover:scale-[1.02]"
+                                onClick={handleSave}
+                                className="flex-1 py-4 md:py-5 rounded-[24px] text-white font-extrabold uppercase text-[10px] md:text-[11px] tracking-widest shadow-xl transition-all hover:scale-[1.02]"
                                 style={{ backgroundColor: settings.accentColor, boxShadow: `0 15px 30px ${settings.accentColor}40` }}
                             >
                                 Save Changes

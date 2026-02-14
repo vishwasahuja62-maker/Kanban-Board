@@ -199,7 +199,7 @@ function TopBar({ currentView, setView, theme, setTheme, isMobile, onMenuToggle 
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-3">
                             <label className="flex items-center gap-2 text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">
                                 <Shield size={14} />

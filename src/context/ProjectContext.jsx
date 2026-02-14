@@ -175,9 +175,20 @@ export function TaskProvider({ children }) {
     };
 
     const updateTask = async (id, data) => {
+        const title = data.name || "Task";
+
+        // Optimistic Update
+        setTasks(prev => prev.map(t => t.id === id ? { ...t, ...data } : t));
+        notify('Unit Updated', `Changes applied to ${title}.`);
+
         const { error } = await supabase.from('tasks').update(data).eq('id', id);
-        if (error) log(`Error: ${error.message}`, true);
-        else log(`Modified task: ${data.name}`);
+
+        if (error) {
+            log(`Update Failed: ${error.message}`, true);
+            notify('Update Error', error.message, 'error');
+        } else {
+            log(`Modified task: ${title}`);
+        }
     };
 
     const updateTaskStatus = async (id, newStatus) => {

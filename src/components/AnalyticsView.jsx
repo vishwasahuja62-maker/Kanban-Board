@@ -21,14 +21,14 @@ function AnalyticsView() {
     const maxCategory = Math.max(...categoryCount.map(c => c.count), 1);
 
     return (
-        <div className="p-10 h-full overflow-y-auto scrollbar-hide space-y-12 pb-32 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+        <div className="p-4 md:p-10 h-full overflow-y-auto scrollbar-hide space-y-8 md:space-y-12 pb-32 animate-in fade-in slide-in-from-bottom-6 duration-1000">
             {/* Header Section */}
-            <div className="flex justify-between items-end mb-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 gap-4">
                 <div>
-                    <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight mb-2">Performance Analytics</h2>
+                    <h2 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white tracking-tight mb-2">Performance Analytics</h2>
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Real-time productivity metrics</p>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex gap-4 self-end">
                     <div className="flex flex-col items-end">
                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Completion Rate</span>
                         <span className="text-xl font-black text-primary" style={{ color: settings.accentColor }}>{completionRate}%</span>
@@ -37,31 +37,31 @@ function AnalyticsView() {
             </div>
 
             {/* Main Metric Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                 {[
                     { label: 'Total Tasks', value: total, icon: Target, color: settings.accentColor },
                     { label: 'Tasks in Progress', value: inProgress, icon: Cpu, color: '#3b82f6' },
                     { label: 'Completed Tasks', value: done, icon: CheckCircle2, color: '#10b981' },
                     { label: 'High Priority', value: high, icon: Zap, color: '#f43f5e' }
                 ].map((stat, i) => (
-                    <div key={i} className="glass-card p-8 rounded-[40px] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+                    <div key={i} className="glass-card p-6 md:p-8 rounded-[32px] md:rounded-[40px] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group border border-white/20 dark:border-white/5 bg-white/50 dark:bg-white/[0.02]">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-current opacity-[0.03] rotate-45 translate-x-16 -translate-y-16 group-hover:opacity-[0.07] transition-opacity" style={{ color: stat.color }} />
-                        <stat.icon className="mb-6 opacity-80" size={24} style={{ color: stat.color }} />
-                        <h3 className="text-4xl font-black text-gray-900 dark:text-white tracking-tighter mb-2">{stat.value}</h3>
+                        <stat.icon className="mb-4 md:mb-6 opacity-80" size={24} style={{ color: stat.color }} />
+                        <h3 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white tracking-tighter mb-2">{stat.value}</h3>
                         <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.15em]">{stat.label}</p>
                     </div>
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-10">
                 {/* Progress Breakdown */}
-                <div className="lg:col-span-2 glass-card p-10 rounded-[48px] border border-white/20 dark:border-white/5 shadow-2xl">
-                    <div className="flex items-center gap-3 mb-10">
+                <div className="lg:col-span-2 glass-card p-6 md:p-10 rounded-[32px] md:rounded-[48px] border border-white/20 dark:border-white/5 shadow-2xl bg-white/50 dark:bg-white/[0.02]">
+                    <div className="flex items-center gap-3 mb-8 md:mb-10">
                         <TrendingUp size={20} className="text-primary" style={{ color: settings.accentColor }} />
                         <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Task Progress</h3>
                     </div>
 
-                    <div className="space-y-12">
+                    <div className="space-y-8 md:space-y-12">
                         <div className="relative pt-1">
                             <div className="flex items-center justify-between mb-4">
                                 <div>
@@ -81,16 +81,16 @@ function AnalyticsView() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-10 pt-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-10 pt-4">
                             {[
                                 { label: 'To Do', value: todo, color: 'bg-indigo-400' },
                                 { label: 'In Progress', value: inProgress, color: 'bg-amber-400' },
                                 { label: 'Completed', value: done, color: 'bg-emerald-400' }
                             ].map((m, i) => (
-                                <div key={i} className="flex flex-col gap-2">
+                                <div key={i} className="flex flex-col gap-2 p-4 rounded-2xl bg-gray-50/50 dark:bg-white/[0.02]">
                                     <div className="flex items-center gap-2">
                                         <div className={`w-2 h-2 rounded-full ${m.color}`} />
-                                        <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">{m.label}</span>
+                                        <span className="text-[9px] font-black uppercase text-gray-400 tracking-widest">{m.label}</span>
                                     </div>
                                     <span className="text-2xl font-black text-gray-900 dark:text-white">{m.value}</span>
                                 </div>
@@ -100,8 +100,8 @@ function AnalyticsView() {
                 </div>
 
                 {/* Category Breakdown */}
-                <div className="glass-card p-10 rounded-[48px] border border-white/20 dark:border-white/5 relative overflow-hidden">
-                    <div className="flex items-center gap-3 mb-10">
+                <div className="glass-card p-6 md:p-10 rounded-[32px] md:rounded-[48px] border border-white/20 dark:border-white/5 relative overflow-hidden bg-white/50 dark:bg-white/[0.02]">
+                    <div className="flex items-center gap-3 mb-8 md:mb-10">
                         <BarChart3 size={20} className="text-primary" style={{ color: settings.accentColor }} />
                         <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Category Distribution</h3>
                     </div>
