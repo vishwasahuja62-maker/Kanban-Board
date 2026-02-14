@@ -36,34 +36,36 @@ function Column({ title, status, tasks }) {
             onDrop={handleDrop}
         >
             {/* ELITE HOLOGRAPHIC OVERLAY */}
-            <div
-                className={`absolute inset-x-[-12px] inset-y-[-12px] rounded-[60px] transition-all duration-700 pointer-events-none overflow-hidden
-                    ${isOver ? 'opacity-100' : 'opacity-0 scale-95'}`}
-                style={{
-                    border: `1px solid ${settings.accentColor}40`,
-                    background: `radial-gradient(circle at top center, ${settings.accentColor}10 0%, transparent 70%)`,
-                    boxShadow: `0 0 50px ${settings.accentColor}15, inset 0 0 30px ${settings.accentColor}05`
-                }}
-            >
-                {/* Tech Grid Background */}
-                <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.07]"
-                    style={{ backgroundImage: `radial-gradient(${settings.accentColor} 1px, transparent 1px)`, backgroundSize: '20px 20px' }} />
+            {settings.holographic && (
+                <div
+                    className={`absolute inset-x-[-12px] inset-y-[-12px] rounded-[60px] transition-all duration-700 pointer-events-none overflow-hidden
+                        ${isOver ? 'opacity-100' : 'opacity-0 scale-95'}`}
+                    style={{
+                        border: `1px solid ${settings.accentColor}40`,
+                        background: `radial-gradient(circle at top center, ${settings.accentColor}10 0%, transparent 70%)`,
+                        boxShadow: `0 0 50px ${settings.accentColor}15, inset 0 0 30px ${settings.accentColor}05`
+                    }}
+                >
+                    {/* Tech Grid Background */}
+                    <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.07]"
+                        style={{ backgroundImage: `radial-gradient(${settings.accentColor} 1px, transparent 1px)`, backgroundSize: '20px 20px' }} />
 
-                {/* Scanning Laser Line */}
-                <div className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-current to-transparent animate-scan-fast"
-                    style={{ color: settings.accentColor, top: '-10%' }} />
+                    {/* Scanning Laser Line */}
+                    <div className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-current to-transparent animate-scan-fast"
+                        style={{ color: settings.accentColor, top: '-10%' }} />
 
-                {/* Corner Brackets */}
-                <div className="absolute top-8 left-8 w-6 h-6 border-t-2 border-l-2 opacity-50" style={{ borderColor: settings.accentColor }} />
-                <div className="absolute top-8 right-8 w-6 h-6 border-t-2 border-r-2 opacity-50" style={{ borderColor: settings.accentColor }} />
-                <div className="absolute bottom-8 left-8 w-6 h-6 border-b-2 border-l-2 opacity-50" style={{ borderColor: settings.accentColor }} />
-                <div className="absolute bottom-8 right-8 w-6 h-6 border-b-2 border-r-2 opacity-50" style={{ borderColor: settings.accentColor }} />
+                    {/* Corner Brackets */}
+                    <div className="absolute top-8 left-8 w-6 h-6 border-t-2 border-l-2 opacity-50" style={{ borderColor: settings.accentColor }} />
+                    <div className="absolute top-8 right-8 w-6 h-6 border-t-2 border-r-2 opacity-50" style={{ borderColor: settings.accentColor }} />
+                    <div className="absolute bottom-8 left-8 w-6 h-6 border-b-2 border-l-2 opacity-50" style={{ borderColor: settings.accentColor }} />
+                    <div className="absolute bottom-8 right-8 w-6 h-6 border-b-2 border-r-2 opacity-50" style={{ borderColor: settings.accentColor }} />
 
-                {/* Floating Particles/Icons */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 animate-ping">
-                    <Target size={120} style={{ color: settings.accentColor }} strokeWidth={0.5} />
+                    {/* Floating Particles/Icons */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 animate-ping">
+                        <Target size={120} style={{ color: settings.accentColor }} strokeWidth={0.5} />
+                    </div>
                 </div>
-            </div>
+            )}
 
             <div className={`relative z-20 flex flex-col h-full transition-all duration-700 ${isOver ? 'translate-y-[-4px]' : ''}`}>
                 <div className="flex justify-between items-end mb-10 px-4">

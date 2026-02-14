@@ -18,9 +18,9 @@ function ArchiveView() {
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
                         <Database size={20} className="text-gray-400" />
-                        <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight"> Secure Repository </h2>
+                        <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight"> Task Archive </h2>
                     </div>
-                    <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em] pl-1"> Decommissioned intelligence units </p>
+                    <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em] pl-1"> Historical task and completion records </p>
                 </div>
 
                 <div className="flex items-center gap-6">
@@ -28,7 +28,7 @@ function ArchiveView() {
                         <Search size={16} className="text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Filter archive..."
+                            placeholder="Search archive..."
                             className="bg-transparent border-none outline-none text-xs font-bold text-gray-700 dark:text-gray-200 w-48"
                         />
                     </div>
@@ -43,10 +43,10 @@ function ArchiveView() {
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="border-b border-gray-100 dark:border-white/5">
-                            <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Mission Object</th>
-                            <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center">Lead Agent</th>
-                            <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center">Final Status</th>
-                            <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center">Archived Date</th>
+                            <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Task Name</th>
+                            <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center">Assigned To</th>
+                            <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center">Last Status</th>
+                            <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center">Archived On</th>
                             <th className="px-8 py-6"></th>
                         </tr>
                     </thead>
@@ -58,7 +58,7 @@ function ArchiveView() {
                                         <div className="w-20 h-20 rounded-full border-2 border-dashed border-current flex items-center justify-center">
                                             <ShieldAlert size={32} />
                                         </div>
-                                        <span className="text-xs font-black uppercase tracking-[0.3em] text-center"> Repository is currently empty </span>
+                                        <span className="text-xs font-black uppercase tracking-[0.3em] text-center"> Archive is currently empty </span>
                                     </div>
                                 </td>
                             </tr>
@@ -127,18 +127,18 @@ function ArchiveView() {
                 <div className="flex items-center gap-8">
                     <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-indigo-500" />
-                        <span className="text-[9px] font-black uppercase text-gray-400 tracking-widest">Active Ops</span>
+                        <span className="text-[9px] font-black uppercase text-gray-400 tracking-widest">Features</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-amber-500" />
-                        <span className="text-[9px] font-black uppercase text-gray-400 tracking-widest">In Service</span>
+                        <span className="text-[9px] font-black uppercase text-gray-400 tracking-widest">Research</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                        <span className="text-[9px] font-black uppercase text-gray-400 tracking-widest">Shipped</span>
+                        <div className="w-2 h-2 rounded-full bg-rose-500" />
+                        <span className="text-[9px] font-black uppercase text-gray-400 tracking-widest">Critical Bugs</span>
                     </div>
                 </div>
-                <span className="text-[10px] font-black text-gray-400/50 uppercase tracking-[0.2em]">Security Level: Elite Commander</span>
+                <span className="text-[10px] font-black text-gray-400/50 uppercase tracking-[0.2em]">Workspace: Pro Manager Mode</span>
             </div>
         </div>
     );

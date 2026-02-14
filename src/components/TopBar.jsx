@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, Moon, Sun, LogOut, ChevronDown, Rocket, Target, Shield, Clock, FileText } from 'lucide-react';
+import { Search, Plus, Moon, Sun, LogOut, ChevronDown, Rocket, Target, Shield, Clock, FileText, LayoutGrid, AlignLeft, BarChart3, Archive } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../context/TaskContext';
 import Modal from './Modal';
@@ -18,10 +18,10 @@ function TopBar({ currentView, setView, theme, setTheme }) {
     const [dueDate, setDueDate] = useState('');
 
     const titleMap = {
-        'board': 'Workspace',
-        'list': 'Inventory',
-        'analytics': 'Intelligence',
-        'archive': 'Repository'
+        'board': 'Task Board',
+        'list': 'Activity Log',
+        'analytics': 'Performance',
+        'archive': 'Archive'
     };
 
     const handleAddTask = (e) => {
@@ -46,60 +46,69 @@ function TopBar({ currentView, setView, theme, setTheme }) {
     };
 
     const viewOptions = [
-        { id: 'board', label: 'Workspace Hub' },
-        { id: 'list', label: 'Detailed Inventory' },
-        { id: 'analytics', label: 'Intelligence Core' },
-        { id: 'archive', label: 'Secure Repository' }
+        { id: 'board', label: 'Task Board', icon: LayoutGrid },
+        { id: 'list', label: 'Activity Log', icon: AlignLeft },
+        { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+        { id: 'archive', label: 'Archive', icon: Archive }
     ];
 
     return (
         <>
-            <header className={`px-10 py-8 flex justify-between items-center z-40 bg-transparent relative ${settings.density === 'compact' ? 'py-4' : 'py-8'}`}>
+            <header className={`sticky top-0 px-10 flex justify-between items-center z-40 transition-all duration-300 backdrop-blur-md border-b border-gray-100 dark:border-white/5 bg-white/70 dark:bg-[#08090d]/70 ${settings.density === 'compact' ? 'py-4' : 'py-8'}`}>
                 <div className="flex items-center gap-12">
                     <div className="flex flex-col relative">
                         <span className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-1">
                             Command Center
                         </span>
                         <div
-                            className="flex items-center gap-2 group cursor-pointer"
+                            className="flex items-center gap-2 group cursor-pointer select-none"
                             onClick={() => setIsViewMenuOpen(!isViewMenuOpen)}
                         >
-                            <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight text-gradient">
+                            <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
                                 {titleMap[currentView]}
                             </h1>
-                            <ChevronDown
-                                size={20}
-                                className={`text-gray-300 mt-1 transition-transform duration-300 ${isViewMenuOpen ? 'rotate-180' : ''}`}
-                                style={isViewMenuOpen ? { color: settings.accentColor } : {}}
-                            />
+                            <div className="p-1.5 rounded-xl bg-gray-50 dark:bg-white/5 group-hover:bg-gray-100 dark:group-hover:bg-white/10 transition-colors">
+                                <ChevronDown
+                                    size={18}
+                                    className={`text-gray-400 transition-transform duration-500 ${isViewMenuOpen ? 'rotate-180' : ''}`}
+                                    style={isViewMenuOpen ? { color: settings.accentColor } : {}}
+                                />
+                            </div>
                         </div>
 
                         {/* View Selector Dropdown */}
                         {isViewMenuOpen && (
-                            <div className="absolute top-[100%] left-0 mt-4 w-66 bg-white/95 dark:bg-card-dark/95 border border-gray-200 dark:border-white/5 rounded-[32px] shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-200 backdrop-blur-2xl">
-                                {viewOptions.map(option => (
-                                    <button
-                                        key={option.id}
-                                        onClick={() => {
-                                            setView(option.id);
-                                            setIsViewMenuOpen(false);
-                                        }}
-                                        className={`w-full text-left px-6 py-4 rounded-2xl text-[13px] font-black transition-all duration-300 flex items-center justify-between group
-                                            ${currentView === option.id
-                                                ? 'bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white border border-gray-100 dark:border-transparent'
-                                                : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200'}`}
-                                    >
-                                        <span>{option.label}</span>
-                                        {currentView === option.id && (
-                                            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: settings.accentColor }} />
-                                        )}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                        {/* Overlay to close menu */}
-                        {isViewMenuOpen && (
-                            <div className="fixed inset-0 z-[-1]" onClick={() => setIsViewMenuOpen(false)} />
+                            <>
+                                <div className="absolute top-[calc(100%+24px)] left-0 w-80 bg-white dark:bg-[#0d1117] border border-gray-200 dark:border-white/10 rounded-[32px] shadow-[0_30px_60px_rgba(0,0,0,0.25)] p-3 z-60 animate-in fade-in slide-in-from-top-4 duration-300">
+                                    <div className="px-5 py-3 mb-2 border-b border-gray-100 dark:border-white/5">
+                                        <span className="text-[9px] font-black uppercase text-gray-400 tracking-[0.2em]">Select Deployment Sector</span>
+                                    </div>
+                                    <div className="space-y-1">
+                                        {viewOptions.map(option => (
+                                            <button
+                                                key={option.id}
+                                                onClick={() => {
+                                                    setView(option.id);
+                                                    setIsViewMenuOpen(false);
+                                                }}
+                                                className={`w-full text-left px-5 py-4 rounded-2xl text-[13px] font-black transition-all duration-300 flex items-center gap-4 group
+                                                    ${currentView === option.id
+                                                        ? 'bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white'
+                                                        : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200'}`}
+                                            >
+                                                <div className={`p-2 rounded-xl transition-colors ${currentView === option.id ? 'bg-white dark:bg-white/10 shadow-sm' : 'bg-transparent text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'}`} style={currentView === option.id ? { color: settings.accentColor } : {}}>
+                                                    <option.icon size={18} />
+                                                </div>
+                                                <span className="flex-1 group-hover:translate-x-1 transition-transform">{option.label}</span>
+                                                {currentView === option.id && (
+                                                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: settings.accentColor }} />
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="fixed inset-0 z-50 cursor-default bg-black/5 backdrop-blur-sm" onClick={() => setIsViewMenuOpen(false)} />
+                            </>
                         )}
                     </div>
 
@@ -152,12 +161,12 @@ function TopBar({ currentView, setView, theme, setTheme }) {
                 </div>
             </header>
 
-            <Modal isOpen={isTaskModalOpen} onClose={() => setIsTaskModalOpen(false)} title="Intelligence Unit Deployment">
+            <Modal isOpen={isTaskModalOpen} onClose={() => setIsTaskModalOpen(false)} title="Create New Task">
                 <form onSubmit={handleAddTask} className="space-y-8 p-1">
                     <div className="space-y-4">
                         <div className="flex items-center gap-2 text-[10px] font-black uppercase text-gray-400 tracking-widest">
                             <Target size={14} />
-                            <span>Core Identification</span>
+                            <span>Task Description</span>
                         </div>
                         <input
                             type="text"
@@ -189,7 +198,7 @@ function TopBar({ currentView, setView, theme, setTheme }) {
                         <div className="space-y-3">
                             <label className="flex items-center gap-2 text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">
                                 <Shield size={14} />
-                                Risk Factor
+                                Priority Level
                             </label>
                             <div className="grid grid-cols-3 gap-2">
                                 {['low', 'medium', 'high'].map(p => (
@@ -210,16 +219,21 @@ function TopBar({ currentView, setView, theme, setTheme }) {
                                 <Rocket size={14} />
                                 Department
                             </label>
-                            <select
-                                value={category}
-                                onChange={(e) => setCategory(e.target.value)}
-                                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 p-3.5 rounded-xl outline-none text-xs font-bold appearance-none cursor-pointer hover:bg-gray-100 dark:hover:bg-white/10"
-                            >
-                                <option value="feature">Feature Development</option>
-                                <option value="bug">Bug Eradication</option>
-                                <option value="design">Elite Design</option>
-                                <option value="research">High R&D</option>
-                            </select>
+                            <div className="relative">
+                                <select
+                                    value={category}
+                                    onChange={(e) => setCategory(e.target.value)}
+                                    className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 p-5 rounded-[20px] outline-none text-[13px] font-bold appearance-none cursor-pointer hover:bg-gray-100 dark:hover:bg-white/10 text-gray-900 dark:text-gray-100 transition-all shadow-sm"
+                                >
+                                    <option value="feature" className="bg-white dark:bg-[#0d1117] text-gray-900 dark:text-white">Feature Development</option>
+                                    <option value="bug" className="bg-white dark:bg-[#0d1117] text-gray-900 dark:text-white">Bug Eradication</option>
+                                    <option value="design" className="bg-white dark:bg-[#0d1117] text-gray-900 dark:text-white">Elite Design</option>
+                                    <option value="research" className="bg-white dark:bg-[#0d1117] text-gray-900 dark:text-white">High R&D</option>
+                                </select>
+                                <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                    <ChevronDown size={16} />
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -242,7 +256,7 @@ function TopBar({ currentView, setView, theme, setTheme }) {
                         style={{ backgroundColor: settings.accentColor, boxShadow: `0 20px 50px -10px ${settings.accentColor}60` }}
                     >
                         <Plus size={20} strokeWidth={4} />
-                        <span>Deploy Objective</span>
+                        <span>Finalize Task</span>
                     </button>
                 </form>
             </Modal>

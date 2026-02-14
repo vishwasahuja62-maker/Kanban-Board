@@ -6,11 +6,12 @@ import ListView from './components/ListView'
 import AnalyticsView from './components/AnalyticsView'
 import ArchiveView from './components/ArchiveView'
 import AuthGateway from './components/AuthGateway'
-import { TaskProvider } from './context/TaskContext'
+import { TaskProvider, useTasks } from './context/TaskContext'
 import { AuthProvider, useAuth } from './context/AuthContext'
 
-function MainLayout() {
+function MainContent() {
     const { user, loading } = useAuth();
+    const { settings } = useTasks();
     const [currentView, setCurrentView] = useState('board');
     const [theme, setTheme] = useState(localStorage.getItem('pk_theme') || 'light');
 
@@ -20,7 +21,7 @@ function MainLayout() {
     }, [theme]);
 
     if (loading) return (
-        <div className="h-screen w-screen flex items-center justify-center bg-app-light dark:bg-app-dark">
+        <div className="h-screen w-screen flex items-center justify-center bg-gray-50 dark:bg-[#08090d]">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary"></div>
         </div>
     );
@@ -28,41 +29,43 @@ function MainLayout() {
     if (!user) return <AuthGateway />;
 
     return (
-        <TaskProvider>
-            <div className="flex h-screen w-screen transition-all duration-400">
+        <div className="flex h-screen w-screen transition-all duration-400">
+            {settings.holographic && (
                 <div className="mesh-bg">
-                    <div className="blob b-1 bg-primary"></div>
-                    <div className="blob b-2 bg-pink-500"></div>
+                    <div className="blob b-1" style={{ backgroundColor: settings.accentColor }}></div>
+                    <div className="blob b-2 bg-rose-500"></div>
                 </div>
+            )}
 
-                <Sidebar currentView={currentView} setView={setCurrentView} />
+            <Sidebar currentView={currentView} setView={setCurrentView} />
 
-                <main className="flex-1 flex flex-col overflow-hidden relative">
-                    <TopBar
-                        currentView={currentView}
-                        setView={setCurrentView}
-                        theme={theme}
-                        setTheme={setTheme}
-                    />
+            <main className="flex-1 flex flex-col overflow-hidden relative">
+                <TopBar
+                    currentView={currentView}
+                    setView={setCurrentView}
+                    theme={theme}
+                    setTheme={setTheme}
+                />
 
-                    <div className="flex-1 overflow-hidden px-10">
-                        <div className="h-full w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
-                            {currentView === 'board' && <BoardView />}
-                            {currentView === 'list' && <ListView />}
-                            {currentView === 'analytics' && <AnalyticsView />}
-                            {currentView === 'archive' && <ArchiveView />}
-                        </div>
+                <div className="flex-1 overflow-hidden px-10">
+                    <div className="h-full w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        {currentView === 'board' && <BoardView />}
+                        {currentView === 'list' && <ListView />}
+                        {currentView === 'analytics' && <AnalyticsView />}
+                        {currentView === 'archive' && <ArchiveView />}
                     </div>
-                </main>
-            </div>
-        </TaskProvider>
+                </div>
+            </main>
+        </div>
     );
 }
 
 function App() {
     return (
         <AuthProvider>
-            <MainLayout />
+            <TaskProvider>
+                <MainContent />
+            </TaskProvider>
         </AuthProvider>
     )
 }

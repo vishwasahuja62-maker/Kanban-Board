@@ -39,9 +39,17 @@ export function AuthProvider({ children }) {
         return { data, error };
     };
 
-    const logout = async () => {
-        await supabase.auth.signOut();
+    const updateProfile = async (metadata) => {
+        const { data, error } = await supabase.auth.updateUser({
+            data: metadata
+        });
+        if (!error && data.user) {
+            setUser(data.user);
+        }
+        return { data, error };
     };
+
+    const metadata = user?.user_metadata || {};
 
     return (
         <AuthContext.Provider value={{
@@ -49,9 +57,10 @@ export function AuthProvider({ children }) {
             login,
             signup,
             logout,
+            updateProfile,
             loading,
-            displayName: user?.email?.split('@')[0] || 'Elite User',
-            avatarUrl: `https://api.dicebear.com/7.x/notionists/svg?seed=${user?.id || 'default'}`
+            displayName: metadata.display_name || user?.email?.split('@')[0] || 'Elite User',
+            avatarUrl: `https://api.dicebear.com/7.x/notionists/svg?seed=${metadata.avatar_seed || user?.id || 'default'}`
         }}>
             {children}
         </AuthContext.Provider>

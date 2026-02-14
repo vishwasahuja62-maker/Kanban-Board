@@ -7,13 +7,39 @@ const TaskContext = createContext();
 export function TaskProvider({ children }) {
     const { user } = useAuth();
     const [tasks, setTasks] = useState([]);
-    const [history, setHistory] = useState(JSON.parse(localStorage.getItem('pk_elite_logs')) || ["Genesis workspace initialized."]);
-    const [notifications, setNotifications] = useState(JSON.parse(localStorage.getItem('pk_elite_notifs')) || []);
-    const [settings, setSettings] = useState(JSON.parse(localStorage.getItem('pk_elite_settings')) || {
-        density: 'standard',
-        accentColor: '#6366f1',
-        showLogs: true
+
+    // User-specific keys
+    const logKey = `pk_logs_${user?.id}`;
+    const notifKey = `pk_notifs_${user?.id}`;
+    const settingsKey = `pk_settings_${user?.id}`;
+
+    const [history, setHistory] = useState(() => {
+        if (!user) return ["Genesis workspace initialized."];
+        const saved = localStorage.getItem(logKey);
+        return saved ? JSON.parse(saved) : ["Genesis workspace initialized."];
     });
+
+    const [notifications, setNotifications] = useState(() => {
+        if (!user) return [];
+        const saved = localStorage.getItem(notifKey);
+        return saved ? JSON.parse(saved) : [];
+    });
+
+    const [settings, setSettings] = useState(() => {
+        const defaultSettings = {
+            density: 'standard',
+            accentColor: '#6366f1',
+            sidebarStyle: 'glass',
+            holographic: true,
+            audio: false,
+            autoArchive: false,
+            showLogs: true
+        };
+        if (!user) return defaultSettings;
+        const saved = localStorage.getItem(settingsKey);
+        return saved ? JSON.parse(saved) : defaultSettings;
+    });
+
     const [activeFilter, setActiveFilter] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -61,18 +87,20 @@ export function TaskProvider({ children }) {
 
     // Persist lists
     useEffect(() => {
-        localStorage.setItem('pk_elite_logs', JSON.stringify(history));
-    }, [history]);
+        if (user) localStorage.setItem(logKey, JSON.stringify(history));
+    }, [history, logKey, user]);
 
     useEffect(() => {
-        localStorage.setItem('pk_elite_notifs', JSON.stringify(notifications));
-    }, [notifications]);
+        if (user) localStorage.setItem(notifKey, JSON.stringify(notifications));
+    }, [notifications, notifKey, user]);
 
     useEffect(() => {
-        localStorage.setItem('pk_elite_settings', JSON.stringify(settings));
-        // Apply theme color dynamically
-        document.documentElement.style.setProperty('--primary-color', settings.accentColor);
-    }, [settings]);
+        if (user) {
+            localStorage.setItem(settingsKey, JSON.stringify(settings));
+            // Apply theme color dynamically
+            document.documentElement.style.setProperty('--primary-color', settings.accentColor);
+        }
+    }, [settings, settingsKey, user]);
 
     const log = (msg, urgent = false) => {
         const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });

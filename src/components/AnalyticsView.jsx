@@ -25,8 +25,8 @@ function AnalyticsView() {
             {/* Header Section */}
             <div className="flex justify-between items-end mb-4">
                 <div>
-                    <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight mb-2">Workspace Intelligence</h2>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Real-time performance metrics</p>
+                    <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight mb-2">Performance Analytics</h2>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Real-time productivity metrics</p>
                 </div>
                 <div className="flex gap-4">
                     <div className="flex flex-col items-end">
@@ -40,10 +40,10 @@ function AnalyticsView() {
             {/* Main Metric Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {[
-                    { label: 'Deployment Capacity', value: total, icon: Target, color: settings.accentColor },
-                    { label: 'Active Missions', value: inProgress, icon: Cpu, color: '#3b82f6' },
-                    { label: 'Eradicated Risks', value: done, icon: CheckCircle2, color: '#10b981' },
-                    { label: 'Critical Errors', value: high, icon: Zap, color: '#f43f5e' }
+                    { label: 'Strategic Tasks', value: total, icon: Target, color: settings.accentColor },
+                    { label: 'Tasks in Progress', value: inProgress, icon: Cpu, color: '#3b82f6' },
+                    { label: 'Completed Milestones', value: done, icon: CheckCircle2, color: '#10b981' },
+                    { label: 'High Priority Issues', value: high, icon: Zap, color: '#f43f5e' }
                 ].map((stat, i) => (
                     <div key={i} className="glass-card p-8 rounded-[40px] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-current opacity-[0.03] rotate-45 translate-x-16 -translate-y-16 group-hover:opacity-[0.07] transition-opacity" style={{ color: stat.color }} />
@@ -59,7 +59,7 @@ function AnalyticsView() {
                 <div className="lg:col-span-2 glass-card p-10 rounded-[48px] border border-white/20 dark:border-white/5 shadow-2xl">
                     <div className="flex items-center gap-3 mb-10">
                         <TrendingUp size={20} className="text-primary" style={{ color: settings.accentColor }} />
-                        <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Deployment Trajectory</h3>
+                        <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Workflow Trajectory</h3>
                     </div>
 
                     <div className="space-y-12">
@@ -67,7 +67,7 @@ function AnalyticsView() {
                             <div className="flex items-center justify-between mb-4">
                                 <div>
                                     <span className="text-[10px] font-black uppercase inline-block py-1 px-3 rounded-full bg-primary/10 text-primary tracking-widest" style={{ backgroundColor: `${settings.accentColor}15`, color: settings.accentColor }}>
-                                        Objective Alpha
+                                        Overall Progress
                                     </span>
                                 </div>
                                 <div className="text-right">
@@ -84,9 +84,9 @@ function AnalyticsView() {
 
                         <div className="grid grid-cols-3 gap-10 pt-4">
                             {[
-                                { label: 'Standby', value: todo, color: 'bg-indigo-400' },
-                                { label: 'In Flight', value: inProgress, color: 'bg-amber-400' },
-                                { label: 'Terminated', value: done, color: 'bg-emerald-400' }
+                                { label: 'To Do', value: todo, color: 'bg-indigo-400' },
+                                { label: 'In Progress', value: inProgress, color: 'bg-amber-400' },
+                                { label: 'Completed', value: done, color: 'bg-emerald-400' }
                             ].map((m, i) => (
                                 <div key={i} className="flex flex-col gap-2">
                                     <div className="flex items-center gap-2">
@@ -104,7 +104,7 @@ function AnalyticsView() {
                 <div className="glass-card p-10 rounded-[48px] border border-white/20 dark:border-white/5 relative overflow-hidden">
                     <div className="flex items-center gap-3 mb-10">
                         <BarChart3 size={20} className="text-primary" style={{ color: settings.accentColor }} />
-                        <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Departments</h3>
+                        <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Focus Distribution</h3>
                     </div>
 
                     <div className="space-y-6">

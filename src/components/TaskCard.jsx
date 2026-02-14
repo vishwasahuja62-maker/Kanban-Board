@@ -1,14 +1,31 @@
-import { MoreHorizontal, Calendar, CheckSquare } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { MoreHorizontal, Calendar, CheckSquare, Trash2, Archive, X } from 'lucide-react';
+import { useTasks } from '../context/TaskContext';
 
 function TaskCard({ task }) {
+    const { settings, purgeTask, archiveTask } = useTasks();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const menuRef = useRef(null);
+
     const total = task.subtasks?.length || 0;
     const done = task.subtasks?.filter(s => s.done).length || 0;
     const pct = total === 0 ? 0 : (done / total) * 100;
 
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (menuRef.current && !menuRef.current.contains(e.target)) {
+                setIsMenuOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     const handleDragStart = (e) => {
+        if (isMenuOpen) return;
         e.dataTransfer.setData('taskId', task.id);
         e.dataTransfer.effectAllowed = 'move';
-        // Add a class for styling while dragging
         e.currentTarget.classList.add('opacity-30', 'scale-95');
     };
 
@@ -50,9 +67,44 @@ function TaskCard({ task }) {
                         </span>
                     </div>
 
-                    <button className="text-gray-300 hover:text-primary transition-colors p-1">
-                        <MoreHorizontal size={16} />
-                    </button>
+                    <div className="relative" ref={menuRef}>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsMenuOpen(!isMenuOpen);
+                            }}
+                            className="text-gray-300 hover:text-primary transition-colors p-1 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5"
+                            style={{ '--tw-hover-color': settings.accentColor }}
+                        >
+                            <MoreHorizontal size={16} />
+                        </button>
+
+                        {isMenuOpen && (
+                            <div className="absolute top-full right-0 mt-2 w-44 bg-white/95 dark:bg-[#0d1117]/95 border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 backdrop-blur-xl">
+                                <button
+                                    onClick={() => {
+                                        archiveTask(task.id);
+                                        setIsMenuOpen(false);
+                                    }}
+                                    className="w-full flex items-center gap-3 px-4 py-2 text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-primary hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-all"
+                                    style={{ '--tw-hover-color': settings.accentColor }}
+                                >
+                                    <Archive size={14} />
+                                    Archive
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        purgeTask(task.id);
+                                        setIsMenuOpen(false);
+                                    }}
+                                    className="w-full flex items-center gap-3 px-4 py-2 text-[11px] font-black uppercase tracking-widest text-rose-400 hover:text-rose-500 hover:bg-rose-500/5 rounded-xl transition-all"
+                                >
+                                    <Trash2 size={14} />
+                                    Purge Unit
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <h4 className="text-[14px] font-bold text-gray-800 dark:text-white mb-6 leading-relaxed">

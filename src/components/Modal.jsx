@@ -13,7 +13,7 @@ function Modal({ isOpen, onClose, title, children }) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
             <div
                 className="glass-card w-full max-w-lg rounded-[32px] overflow-hidden animate-in slide-in-from-bottom-8 duration-500 shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
